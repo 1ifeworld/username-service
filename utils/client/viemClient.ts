@@ -1,4 +1,3 @@
-
 import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { river_j5bpjduqfv } from './customChainConfig'
@@ -10,5 +9,3 @@ export const relayWalletClient = createWalletClient({
   chain: river_j5bpjduqfv,
   transport: http(process.env.RPC_URL),
 })
-
-

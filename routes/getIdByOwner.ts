@@ -14,10 +14,9 @@ export type HTTPMethod =
   | 'TRACE'
 
 export default defineEventHandler(async (event) => {
-
-   // Define CORS options
-   const corsOptions = {
-    methods: ['GET','POST', 'OPTIONS'] as HTTPMethod[],
+  // Define CORS options
+  const corsOptions = {
+    methods: ['GET', 'POST', 'OPTIONS'] as HTTPMethod[],
     allowHeaders: [
       'Authorization',
       'Content-Type',
@@ -43,7 +42,7 @@ export default defineEventHandler(async (event) => {
   // Manually parsing the request body
   const bodyPromise = new Promise((resolve, reject) => {
     let body = ''
-    event.node.req.on('data', chunk => {
+    event.node.req.on('data', (chunk) => {
       body += chunk.toString()
     })
     event.node.req.on('end', () => {
