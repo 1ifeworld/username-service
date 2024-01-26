@@ -8,8 +8,7 @@ export async function set(nameData: Name) {
 
   try {
     await db
-      // .insertInto('names')
-      .insertInto('nombres')
+      .insertInto('names')
       .values(body)
       .onConflict((oc) => oc.column('name').doUpdateSet(body))
       .execute()

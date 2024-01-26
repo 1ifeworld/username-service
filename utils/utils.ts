@@ -28,7 +28,6 @@ export function parseNameFromDb(
       signature: name.signature,
       timestamp: name.timestamp,
       to: name.to,
-      from: name.from,
     }
   }
 }
@@ -54,9 +53,8 @@ export function stringifyNameForDb(
       name: name.name,
       owner: name.owner,
       signature: name.signature,
-      timestamp: name.timestamp,
       to: name.to,
-      from: name.from,
+      timestamp: name.timestamp,
     }
   }
 }

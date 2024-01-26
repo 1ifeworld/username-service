@@ -71,14 +71,12 @@ export default defineEventHandler(async (event) => {
 
   try {
     const results = await db
-      // .selectFrom('names')
-      .selectFrom('nombres')
+      .selectFrom('names')
       .selectAll()
       .where('id', '=', id)
       .execute()
 
     const safeParsedResults = parseNameFromDb(results)
-    console.log("safe parse",safeParsedResults )
 
     if (!safeParsedResults[0].name) {
       return Response.json({ error: 'Username not found' }, { status: 404 })
@@ -88,7 +86,7 @@ export default defineEventHandler(async (event) => {
 
     return Response.json({ username }, { status: 200 })
   } catch (error) {
-    console.error('Error fetching username:', error)
+    // console.error('Error fetching username:', error)
     return Response.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 })

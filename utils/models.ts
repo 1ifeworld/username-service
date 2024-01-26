@@ -7,7 +7,6 @@ export const ZodName = z.object({
   owner: z.string(), // Mandatory privy address
   signature: z.string(), // Mandatory ECDSA signature
   timestamp: z.string().optional(), // Optional unix timestamp
-  from: z.string().optional(), // Optional '' for registering a new username
   to: z.string().optional(), // Optional '' for unregistering a new username
 })
 
@@ -27,6 +26,5 @@ export interface NameInKysely {
   owner: string
   signature: string
   timestamp: string
-  from: string
   to: string
 }

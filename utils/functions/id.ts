@@ -6,8 +6,7 @@ export async function getIdByOwner(owner: string): Promise<string | null> {
     const db = createKysely()
     console.log('Executing database query')
     const record = await db
-      // .selectFrom('names')
-      .selectFrom('nombres')
+      .selectFrom('names')
       .select('id') // Just select the 'id' column
       .select('from')
       .where('owner', '=', owner)
@@ -22,7 +21,7 @@ export async function getIdByOwner(owner: string): Promise<string | null> {
     // return record.id
     if (record.id && record.from) {
       return record.id
-  }
+    }
   } catch (error) {
     console.error('Error caught in getIdByOwner function:', error)
     throw error

@@ -8,8 +8,7 @@ export async function get(name: string): Promise<Name | null> {
     const db = createKysely()
     ;('Executing database query')
     const record = await db
-      // .selectFrom('names')
-      .selectFrom('nombres')
+      .selectFrom('names')
       .selectAll()
       .where('name', '=', name)
       .executeTakeFirst()

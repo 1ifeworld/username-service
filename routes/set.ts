@@ -30,53 +30,30 @@ export default defineEventHandler(async (event) => {
   if (event.node.req.method !== 'POST') {
     return { error: 'Method not allowed', statusCode: 405 }
   }
-
-  // Manually parsing the request body
   let body
   try {
-    body = await new Promise((resolve, reject) => {
-      let rawData = ''
-      event.node.req.on('data', (chunk) => {
-        rawData += chunk.toString()
-      })
-      event.node.req.on('end', () => resolve(JSON.parse(rawData)))
-    })
+    body = await readBody(event)
   } catch (error) {
     console.error('Error parsing request body:', error)
-    return Response.json(
-      { success: false, error: 'Invalid request' },
-      { status: 400 },
-    )
+    return { success: false, error: 'Invalid request', statusCode: 400 }
   }
 
-  // Reformat the received data
-  const { registrationParameters, signature } = body
-  const { owner } = registrationParameters
+  // Extract data from the body for Zod validation
 
-  const reformattedData = {
-    ...registrationParameters,
-    signature,
-    owner,
-  }
+console.log("body", body)
 
-  console.log(reformattedData)
-
-  // Validate the data
-  const parseResult = ZodName.safeParse(reformattedData)
-
-  console.log(parseResult)
-  if (!parseResult.success) {
-    console.error('Invalid input')
-    return Response.json(
-      { success: false, error: 'Invalid input' },
-      { status: 400 },
-    )
-  }
+// Validate the data with Zod
+const parseResult = ZodName.safeParse( body)
+console.error('Invalid input', parseResult.success);
+if (!parseResult.success) {
+  console.error('Invalid input')
+  return { success: false, error: 'Invalid input', statusCode: 400 }
+}
 
   // Validate signature
   try {
     const messageToVerify = JSON.stringify(parseResult.data)
-    
+
     const isValidSignature = verifyMessage({
       address: parseResult.data.owner as Hex,
       signature: parseResult.data.signature as Hex,
@@ -110,5 +87,5 @@ export default defineEventHandler(async (event) => {
       err instanceof Error ? err.message : 'An unexpected error occurred'
     const response = { success: false, error: errorMessage }
     return Response.json(response, { status: 500 })
-  }
-})
+  }}
+)

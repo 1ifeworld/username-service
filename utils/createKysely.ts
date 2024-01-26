@@ -6,8 +6,7 @@ const { Pool } = pkg
 
 export interface Database {
   // names: NameInKysely
-  nombres: NameInKysely
-
+  names: NameInKysely
 }
 
 let dbInstance = null
