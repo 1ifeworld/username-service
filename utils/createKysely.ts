@@ -5,7 +5,9 @@ import pkg from 'pg'
 const { Pool } = pkg
 
 export interface Database {
-  names: NameInKysely
+  // names: NameInKysely
+  nombres: NameInKysely
+
 }
 
 let dbInstance = null

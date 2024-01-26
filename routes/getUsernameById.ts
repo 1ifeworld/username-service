@@ -71,7 +71,8 @@ export default defineEventHandler(async (event) => {
 
   try {
     const results = await db
-      .selectFrom('names')
+      // .selectFrom('names')
+      .selectFrom('nombres')
       .selectAll()
       .where('id', '=', id)
       .execute()
