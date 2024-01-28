@@ -8,7 +8,6 @@ export async function getIdByOwner(owner: string): Promise<string | null> {
     const record = await db
       .selectFrom('names')
       .select('id') // Just select the 'id' column
-      .select('from')
       .where('owner', '=', owner)
       .executeTakeFirst()
 
@@ -16,12 +15,7 @@ export async function getIdByOwner(owner: string): Promise<string | null> {
       console.log('No record found for owner:', owner)
       return null
     }
-    console.log('ID retrieved from database:', record.id)
-    console.log('ID retrieved from database:', record.from)
-    // return record.id
-    if (record.id && record.from) {
-      return record.id
-    }
+    return record.id
   } catch (error) {
     console.error('Error caught in getIdByOwner function:', error)
     throw error

@@ -18,75 +18,76 @@ export default defineEventHandler(async (event) => {
   // Apply CORS to the request
   useCORS(event, corsOptions)
 
-  // Handle preflight (OPTIONS) request
   if (event.node.req.method === 'OPTIONS') {
-    // End the response for OPTIONS request
-    return { statusCode: 204 }
-  }
+  } else if (event.node.req.method !== 'POST') {
+    return createError({ statusCode: 405, statusMessage: 'Method not allowed' })
+  } else {
+    try {
+      // Manually parsing the request body
+      const bodyPromise = new Promise((resolve, reject) => {
+        let body = ''
+        event.node.req.on('data', (chunk) => {
+          body += chunk.toString()
+        })
+        event.node.req.on('end', () => {
+          try {
+            resolve(JSON.parse(body))
+          } catch (e) {
+            reject(e)
+          }
+        })
+      })
 
-  // Ensure this is a POST request
-  if (event.node.req.method !== 'POST') {
-    return { error: 'Method not allowed', statusCode: 405 }
-  }
-
-  // Manually parsing the request body
-  const bodyPromise = new Promise((resolve, reject) => {
-    let body = ''
-    event.node.req.on('data', (chunk) => {
-      body += chunk.toString()
-    })
-    event.node.req.on('end', () => {
+      let body
       try {
-        resolve(JSON.parse(body))
-      } catch (e) {
-        reject(e)
+        body = await bodyPromise
+      } catch (error) {
+        console.error('Error parsing request body:', error)
+        return Response.json({ error: 'Invalid request' }, { status: 400 })
       }
-    })
-  })
 
-  let body
-  try {
-    body = await bodyPromise
-  } catch (error) {
-    console.error('Error parsing request body:', error)
-    return Response.json({ error: 'Invalid request' }, { status: 400 })
-  }
+      // Define the schema for expected body
+      const schema = zod.object({
+        id: zod.string(), // Assuming id as string due to previous BigInt serialization issue
+      })
 
-  // Define the schema for expected body
-  const schema = zod.object({
-    id: zod.string(), // Assuming id as string due to previous BigInt serialization issue
-  })
+      const safeParse = schema.safeParse(body)
 
-  const safeParse = schema.safeParse(body)
+      if (!safeParse.success) {
+        const response = { error: 'Invalid input' }
+        return Response.json(response, { status: 400 })
+      }
 
-  if (!safeParse.success) {
-    const response = { error: 'Invalid input' }
-    return Response.json(response, { status: 400 })
-  }
+      const { id } = safeParse.data
 
-  const { id } = safeParse.data
+      // Create Kysely instance
+      const db = createKysely() // Assuming createKysely is properly configured
 
-  // Create Kysely instance
-  const db = createKysely() // Assuming createKysely is properly configured
+      try {
+        const results = await db
+          .selectFrom('names')
+          .selectAll()
+          .where('id', '=', id)
+          .execute()
 
-  try {
-    const results = await db
-      .selectFrom('names')
-      .selectAll()
-      .where('id', '=', id)
-      .execute()
+        const safeParsedResults = parseNameFromDb(results)
 
-    const safeParsedResults = parseNameFromDb(results)
+        if (!safeParsedResults[0].name) {
+          return Response.json({ error: 'Username not found' }, { status: 404 })
+        }
 
-    if (!safeParsedResults[0].name) {
-      return Response.json({ error: 'Username not found' }, { status: 404 })
+        const username = safeParsedResults[0].name
+
+        return Response.json({ username }, { status: 200 })
+      } catch (error) {
+        // console.error('Error fetching username:', error)
+        return Response.json(
+          { error: 'Internal Server Error' },
+          { status: 500 },
+        )
+      }
+    } catch (e) {
+      console.error('Error with Route', e)
     }
-
-    const username = safeParsedResults[0].name
-
-    return Response.json({ username }, { status: 200 })
-  } catch (error) {
-    // console.error('Error fetching username:', error)
-    return Response.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 })
