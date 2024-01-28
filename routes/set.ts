@@ -39,7 +39,6 @@ export default defineEventHandler(async (event) => {
 
       // Validate the data with Zod
       const parseResult = ZodName.safeParse(body)
-      console.error('Invalid input', parseResult.success)
       if (!parseResult.success) {
         console.error('Invalid input')
         return { success: false, error: 'Invalid input', statusCode: 400 }
