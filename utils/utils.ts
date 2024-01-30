@@ -80,8 +80,8 @@ export async function getLastSetNameTimestamp(id: string): Promise<string> {
 
 export async function checkNameOwnership(id: string): Promise<boolean> {
   try {
-    const response = await $fetch<internalResponse>('/api/getUsernameById', {
-      method: 'POST', 
+    const response = await $fetch<internalResponse>('./routes/getUsernameById', {
+      method: 'POST',
       body: { id },
     })
 

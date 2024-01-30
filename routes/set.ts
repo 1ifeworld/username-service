@@ -48,7 +48,8 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: "Invalid input", statusCode: 400 }
       }
 
-      const currentTimestamp = Math.floor(Date.now() / 1000)
+      const currentTimestamp = Math.floor(Date.now())
+      console.log(currentTimestamp)
       const providedTimestamp = parseInt(parseResult.data.timestamp || "0")
       if (providedTimestamp > currentTimestamp + 60) {
         console.error("Invalid timestamp")
