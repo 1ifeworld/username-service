@@ -66,8 +66,9 @@ interface internalResponse {
 
 export async function getLastSetNameTimestamp(id: string): Promise<string> {
   try {
+    console.log("INSIDE GET LAST SET TIME")
     const response = await $fetch<internalResponse>('/getLastTimestamp', {
-      method: 'GET',
+      method: 'POST',
       params: { id },
     })
 
