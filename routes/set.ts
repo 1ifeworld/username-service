@@ -1,9 +1,11 @@
 import { ZodName } from '../utils/models'
-import { get } from '../utils/functions/get'
 import { set } from '../utils/functions/set'
 import { Hex, verifyMessage } from 'viem'
 import { useCORS } from 'nitro-cors'
 import { HTTPMethod } from './getIdByOwner'
+import { addresses } from '../utils/constants/contracts'
+import { idRegistryABI } from '../utils/abi/generated'
+import { publicClient } from '../utils/client/viemClient'
 
 export default defineEventHandler(async (event) => {
   // Define CORS options
@@ -63,14 +65,23 @@ export default defineEventHandler(async (event) => {
         return Response.json(response, { status: 401 })
       }
 
-      // Check if the name is already taken
-      const existingName = await get(parseResult.data.name)
-      if (existingName && existingName.owner !== parseResult.data.owner) {
-        const response = { success: false, error: 'Name already taken' }
-        return Response.json(response, { status: 409 })
+      const ownerId = await publicClient.readContract({
+        address: addresses.idRegistry.river_j5bpjduqfv,
+        abi: idRegistryABI,
+        functionName: 'idOwnedBy',
+        args: [parseResult.data.id as Hex],
+      })
+
+      console.log("OWNERID", ownerId)
+
+      if (ownerId.toString() !== parseResult.data.owner) {
+        return {
+          success: false,
+          error: 'Not the owner of the ID',
+          statusCode: 401,
+        }
       }
 
-      // Save the name
       try {
         await set(parseResult.data)
         const response = { success: true }
