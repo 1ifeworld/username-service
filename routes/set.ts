@@ -19,100 +19,116 @@ export default defineEventHandler(async (event) => {
       "Access-Control-Allow-Origin",
     ],
     preflight: { statusCode: 204 },
-  }
+  };
 
   // Apply CORS to the request
-  useCORS(event, corsOptions)
+  useCORS(event, corsOptions);
 
   if (event.node.req.method === "OPTIONS") {
   } else if (event.node.req.method !== "POST") {
     return createError({
       statusCode: 405,
       statusMessage: "Method not allowed",
-    })
+    });
   } else {
     try {
-      let body
+      let body;
       try {
-        body = await readBody(event)
+        body = await readBody(event);
       } catch (error) {
-        console.error("Error parsing request body:", error)
-        return { success: false, error: "Invalid request", statusCode: 400 }
+        console.error("Error parsing request body:", error);
+        return { success: false, error: "Invalid request", statusCode: 400 };
       }
 
-      console.log("body", body)
+      console.log("body", body);
 
-      const parseResult = ZodName.safeParse(body)
+      const parseResult = ZodName.safeParse(body);
       if (!parseResult.success) {
-        console.error("Invalid input")
-        return { success: false, error: "Invalid input", statusCode: 400 }
+        console.error("Invalid input");
+        return { success: false, error: "Invalid input", statusCode: 400 };
       }
 
-      const currentTimestamp = Math.floor(Date.now())
-      console.log(currentTimestamp)
-      const providedTimestamp = parseInt(parseResult.data.timestamp || "0")
+      const currentTimestamp = Math.floor(Date.now());
+      console.log(currentTimestamp);
+      const providedTimestamp = parseInt(parseResult.data.timestamp || "0");
       if (providedTimestamp > currentTimestamp + 60) {
-        console.error("Invalid timestamp")
-        return { success: false, error: "Invalid timestamp", statusCode: 400 }
+        console.error("Invalid timestamp");
+        return { success: false, error: "Invalid timestamp", statusCode: 400 };
       }
 
-      const ownerId = await publicClient.readContract({
-        address: addresses.idRegistry.river_j5bpjduqfv,
-        abi: idRegistryABI,
-        functionName: "idOwnedBy",
-        args: [parseResult.data.owner as Hex],
-      })
+      let ownerId;
+      try {
+        ownerId = await publicClient.readContract({
+          address: addresses.idRegistry.river_j5bpjduqfv,
+          abi: idRegistryABI,
+          functionName: "idOwnedBy",
+          args: [parseResult.data.owner as Hex],
+        });
+      } catch (error) {
+        console.error("Error fetching owner ID:", error);
+        return { success: false, error: "Error fetching owner ID", statusCode: 500 };
+      }
 
-      console.log("ID to check for", parseResult.data.id)
-      console.log("OWNERID", ownerId)
+      console.log("Fetched owner ID:", ownerId);
+      console.log("ID to check for", parseResult.data.id);
 
       if (ownerId.toString() !== parseResult.data.id) {
         return {
           success: false,
           error: "Not the owner of the ID",
           statusCode: 401,
-        }
+        };
       }
 
-      if (parseResult.data.to) {
-        const toIdOwnership = await publicClient.readContract({
-          address: addresses.idRegistry.river_j5bpjduqfv,
-          abi: idRegistryABI,
-          functionName: "idOwnedBy",
-          args: [parseResult.data.to as Hex],
-        })
+      try {
+        if (parseResult.data.to) {
+          const toIdOwnership = await publicClient.readContract({
+            address: addresses.idRegistry.river_j5bpjduqfv,
+            abi: idRegistryABI,
+            functionName: "idOwnedBy",
+            args: [parseResult.data.to as Hex],
+          });
 
-        console.log("TO ID OWNERSHIP", toIdOwnership)
+          console.log("TO ID OWNERSHIP", toIdOwnership);
 
-        if (toIdOwnership.toString() !== "0") {
-          console.error('The "to" fid already owns a username')
-          return {
-            success: false,
-            error: 'The "to" fid already owns a username',
-            statusCode: 400,
+          if (toIdOwnership.toString() !== "0") {
+            console.error('The "to" fid already owns a username');
+            return {
+              success: false,
+              error: 'The "to" fid already owns a username',
+              statusCode: 400,
+            };
           }
         }
-      }
-      // name check
-
-      const nameOwned = await checkNameOwnership(parseResult.data.id)
-      console.log("NAME OWNED", nameOwned)
-      if (nameOwned) {
-        console.error('The name is already owned.')
-        return { success: false, error: 'Name already owned', statusCode: 400 }
+      } catch (error) {
+        console.error("Error checking 'to' ID ownership:", error);
+        return { success: false, error: "Error checking 'to' ID ownership", statusCode: 500 };
       }
 
-      // timestamp
-
-      const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id)
-      console.log("TIMESTAMP",lastSetTimestamp )
-
-      const secondsIn28Days = 2419200
-      if (providedTimestamp - +lastSetTimestamp < secondsIn28Days) {
-        console.error('Name change not allowed within 28 days')
-        return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
+      try {
+        const nameOwned = await checkNameOwnership(parseResult.data.id);
+        console.log("NAME OWNED", nameOwned);
+        if (nameOwned) {
+          console.error('The name is already owned.');
+          return { success: false, error: 'Name already owned', statusCode: 400 };
+        }
+      } catch (error) {
+        console.error("Error checking name ownership:", error);
+        return { success: false, error: "Error checking name ownership", statusCode: 500 };
       }
 
+      try {
+        const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id);
+        console.log("TIMESTAMP", lastSetTimestamp);
+
+        const secondsIn28Days = 2419200;
+        if (providedTimestamp - +lastSetTimestamp < secondsIn28Days) {
+          console.error('Name change not allowed within 28 days');
+          return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
+      }  } catch (error) {
+        console.error("Error checking name ownership:", error);
+        return { success: false, error: "Error checking name ownership", statusCode: 500 };
+      }
 
       // Validate signature
       try {
