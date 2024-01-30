@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
       console.log("TO OWNERSHIp")
       let nameOwned
       try {
-        nameOwned = await fetch("./getUsernameById", {
+        nameOwned = await fetch("https://username-service-username-service-pr-6.up.railway.app/getUsernameById", {
           method: "POST",
           body: JSON.stringify({ id: parseResult.data.id }),
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ export default defineEventHandler(async (event) => {
 
       try {
         console.log("INSIDE GET LAST SET TIME")
-        const response: internalResponse = await $fetch("./getLastTimestamp", {
+        const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
           method: "POST",
           body: JSON.stringify({ id: parseResult.data.id }),
         })
