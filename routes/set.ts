@@ -46,19 +46,19 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
 
-      const ownerValidation = await publicClient.readContract({
+      const ownerId = await publicClient.readContract({
         address: addresses.idRegistry.river_j5bpjduqfv,
         abi: idRegistryABI,
         functionName: 'idOwnedBy',
-        args: [parseResult.data.id as Hex],
+        args: [parseResult.data.owner as Hex],
       })
 
       console.log("ID to check for", parseResult.data.id)
-      console.log("OWNERID", ownerValidation)
+      console.log("OWNERID", ownerId)
 
-      if (ownerValidation.toString() == parseResult.data.owner) {
+      if (ownerId.toString() == parseResult.data.id) {
         console.log("IS OWNER!") }
-      else if (ownerValidation.toString() !== parseResult.data.owner) {
+      else if (ownerId.toString() !== parseResult.data.id) {
         return {
           success: false,
           error: 'Not the owner of the ID',
