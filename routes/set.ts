@@ -66,9 +66,7 @@ export default defineEventHandler(async (event) => {
       console.log("ID to check for", parseResult.data.id)
       console.log("OWNERID", ownerId)
 
-      if (ownerId.toString() == parseResult.data.id) {
-        console.log("IS OWNER!")
-      } else if (ownerId.toString() !== parseResult.data.id) {
+      if (ownerId.toString() !== parseResult.data.id) {
         return {
           success: false,
           error: "Not the owner of the ID",
