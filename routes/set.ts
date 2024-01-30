@@ -83,6 +83,8 @@ export default defineEventHandler(async (event) => {
           args: [parseResult.data.to as Hex],
         })
 
+        console.log("TO ID OWNERSHIP", toIdOwnership)
+
         if (toIdOwnership.toString() !== "0") {
           console.error('The "to" fid already owns a username')
           return {
@@ -93,7 +95,9 @@ export default defineEventHandler(async (event) => {
         }
       }
       // name check
+
       const nameOwned = await checkNameOwnership(parseResult.data.id)
+      console.log("NAME OWNED", nameOwned)
       if (nameOwned) {
         console.error('The name is already owned.')
         return { success: false, error: 'Name already owned', statusCode: 400 }
@@ -102,6 +106,7 @@ export default defineEventHandler(async (event) => {
       // timestamp
 
       const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id)
+      console.log("TIMESTAMP",lastSetTimestamp )
 
       const secondsIn28Days = 2419200
       if (providedTimestamp - +lastSetTimestamp < secondsIn28Days) {
@@ -119,7 +124,7 @@ export default defineEventHandler(async (event) => {
           signature: parseResult.data.signature as Hex,
           message: messageToVerify,
         })
-
+        console.log("VALID SIG",isValidSignature )
         if (!isValidSignature) {
           throw new Error("Invalid signature")
         }
