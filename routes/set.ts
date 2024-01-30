@@ -46,6 +46,25 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
 
+      const ownerId = await publicClient.readContract({
+        address: addresses.idRegistry.river_j5bpjduqfv,
+        abi: idRegistryABI,
+        functionName: 'idOwnedBy',
+        args: [parseResult.data.id as Hex],
+      })
+
+      console.log("OWNERID", ownerId)
+
+      if (ownerId.toString() == parseResult.data.owner) {
+        console.log("IS OWNER!") }
+      else if (ownerId.toString() !== parseResult.data.owner) {
+        return {
+          success: false,
+          error: 'Not the owner of the ID',
+          statusCode: 401,
+        }
+      }
+
       // Validate signature
       try {
         const messageToVerify = JSON.stringify(parseResult.data)
@@ -63,23 +82,6 @@ export default defineEventHandler(async (event) => {
         console.error(err)
         const response = { success: false, error: 'Invalid signature' }
         return Response.json(response, { status: 401 })
-      }
-
-      const ownerId = await publicClient.readContract({
-        address: addresses.idRegistry.river_j5bpjduqfv,
-        abi: idRegistryABI,
-        functionName: 'idOwnedBy',
-        args: [parseResult.data.id as Hex],
-      })
-
-      console.log("OWNERID", ownerId)
-
-      if (ownerId.toString() !== parseResult.data.owner) {
-        return {
-          success: false,
-          error: 'Not the owner of the ID',
-          statusCode: 401,
-        }
       }
 
       try {
