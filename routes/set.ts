@@ -7,7 +7,7 @@ import { addresses } from "../utils/constants/contracts"
 import { idRegistryABI } from "../utils/abi/generated"
 import { publicClient } from "../utils/client/viemClient"
 import { getLastSetNameTimestamp, checkNameOwnership } from "../utils/utils"
-
+import { internalResponse } from "../utils/utils"
 
 export default defineEventHandler(async (event) => {
   // Define CORS options
@@ -66,7 +66,11 @@ export default defineEventHandler(async (event) => {
         })
       } catch (error) {
         console.error("Error fetching owner ID:", error)
-        return { success: false, error: "Error fetching owner ID", statusCode: 500 }
+        return {
+          success: false,
+          error: "Error fetching owner ID",
+          statusCode: 500,
+        }
       }
 
       console.log("Fetched owner ID:", ownerId)
@@ -81,54 +85,54 @@ export default defineEventHandler(async (event) => {
       }
 
       console.log("TO OWNERSHIp")
+      let nameOwned
       try {
-        if (parseResult.data.to) {
-          const toIdOwnership = await publicClient.readContract({
-            address: addresses.idRegistry.river_j5bpjduqfv,
-            abi: idRegistryABI,
-            functionName: "idOwnedBy",
-            args: [parseResult.data.to as Hex],
-          })
-
-          console.log("TO ID OWNERSHIP", toIdOwnership)
-
-          if (toIdOwnership.toString() !== "0") {
-            console.error('The "to" fid already owns a username')
-            return {
-              success: false,
-              error: 'The "to" fid already owns a username',
-              statusCode: 400,
-            }
-          }
-        }
+        nameOwned = await fetch("/getUsernameById", {
+          method: "POST",
+          body: JSON.stringify({ id: parseResult.data.id }),
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => res.json())
       } catch (error) {
-        console.error("Error checking 'to' ID ownership:", error)
-        return { success: false, error: "Error checking 'to' ID ownership", statusCode: 500 }
-      }
-      console.log("CHECKIG NAME OWNERSHIP")
-      try {
-        const nameOwned = await checkNameOwnership(parseResult.data.id)
-        console.log("NAME OWNED", nameOwned)
-        if (nameOwned) {
-          console.error('The name is already owned.')
-          return { success: false, error: 'Name already owned', statusCode: 400 }
+        console.error("Error fetching username:", error)
+        return {
+          success: false,
+          error: "Unable to fetch username",
+          statusCode: 500,
         }
-      } catch (error) {
-        console.error("Error checking name ownership:", error)
-        return { success: false, error: "Error checking name ownership", statusCode: 500 }
       }
 
+      if (nameOwned && nameOwned.username) {
+        return { success: false, error: "Name already owned", statusCode: 400 }
+      }
+
+      let lastSetTimestamp
+
       try {
-        const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id)
+        console.log("INSIDE GET LAST SET TIME")
+        const response: internalResponse = await $fetch("/getLastTimestamp", {
+          method: "POST",
+          body: JSON.stringify({ id: parseResult.data.id }),
+        })
+
+        lastSetTimestamp = response.timestamp
         console.log("TIMESTAMP", lastSetTimestamp)
 
         const secondsIn28Days = 2419200
-        if (providedTimestamp - +lastSetTimestamp < secondsIn28Days) {
-          console.error('Name change not allowed within 28 days')
-          return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
-      }  } catch (error) {
+        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
+          console.error("Name change not allowed within 28 days")
+          return {
+            success: false,
+            error: "Name change not allowed within 28 days",
+            statusCode: 400,
+          }
+        }
+      } catch (error) {
         console.error("Error checking name ownership:", error)
-        return { success: false, error: "Error checking name ownership", statusCode: 500 }
+        return {
+          success: false,
+          error: "Error checking name ownership",
+          statusCode: 500,
+        }
       }
 
       // Validate signature
@@ -140,7 +144,7 @@ export default defineEventHandler(async (event) => {
           signature: parseResult.data.signature as Hex,
           message: messageToVerify,
         })
-        console.log("VALID SIG",isValidSignature )
+        console.log("VALID SIG", isValidSignature)
         if (!isValidSignature) {
           throw new Error("Invalid signature")
         }
@@ -166,4 +170,3 @@ export default defineEventHandler(async (event) => {
     }
   }
 })
-

@@ -58,7 +58,7 @@ export function stringifyNameForDb(
     }
   }
 }
-interface internalResponse {
+export interface internalResponse {
   username: string
   id: string
   timestamp: string
