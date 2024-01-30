@@ -80,6 +80,7 @@ export async function getLastSetNameTimestamp(id: string): Promise<string> {
 
 export async function checkNameOwnership(id: string): Promise<boolean> {
   try {
+    console.log("INSIDE CHECKNAME")
     const response = await $fetch<internalResponse>('/getUsernameById', {
       method: 'POST',
       body: { id },
