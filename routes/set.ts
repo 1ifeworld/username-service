@@ -80,6 +80,7 @@ export default defineEventHandler(async (event) => {
         };
       }
 
+      console.log("TO OWNERSHIp")
       try {
         if (parseResult.data.to) {
           const toIdOwnership = await publicClient.readContract({
@@ -89,7 +90,7 @@ export default defineEventHandler(async (event) => {
             args: [parseResult.data.to as Hex],
           });
 
-          console.log("TO ID OWNERSHIP", toIdOwnership);
+          console.log("TO ID OWNERSHIP", toIdOwnership)
 
           if (toIdOwnership.toString() !== "0") {
             console.error('The "to" fid already owns a username');
@@ -104,21 +105,21 @@ export default defineEventHandler(async (event) => {
         console.error("Error checking 'to' ID ownership:", error);
         return { success: false, error: "Error checking 'to' ID ownership", statusCode: 500 };
       }
-
+      console.log("CHECKIG NAME OWNERSHIP")
       try {
         const nameOwned = await checkNameOwnership(parseResult.data.id);
-        console.log("NAME OWNED", nameOwned);
+        console.log("NAME OWNED", nameOwned)
         if (nameOwned) {
-          console.error('The name is already owned.');
-          return { success: false, error: 'Name already owned', statusCode: 400 };
+          console.error('The name is already owned.')
+          return { success: false, error: 'Name already owned', statusCode: 400 }
         }
       } catch (error) {
-        console.error("Error checking name ownership:", error);
-        return { success: false, error: "Error checking name ownership", statusCode: 500 };
+        console.error("Error checking name ownership:", error)
+        return { success: false, error: "Error checking name ownership", statusCode: 500 }
       }
 
       try {
-        const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id);
+        const lastSetTimestamp = await getLastSetNameTimestamp(parseResult.data.id)
         console.log("TIMESTAMP", lastSetTimestamp);
 
         const secondsIn28Days = 2419200;
