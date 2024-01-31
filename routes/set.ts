@@ -275,7 +275,7 @@ export default defineEventHandler(async (event) => {
 
       let lastSetTimestamp
       try {
-        const response = await fetch(
+         lastSetTimestamp = await fetch(
           'https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp',
           {
             method: 'POST',
@@ -283,8 +283,6 @@ export default defineEventHandler(async (event) => {
             headers: { 'Content-Type': 'application/json' },
           }
         ).then((res) => res.json())
-
-        lastSetTimestamp = response.timestamp
 
         const secondsIn28Days = 2419200
         if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
