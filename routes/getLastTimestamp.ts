@@ -1,9 +1,10 @@
 import zod from 'zod'
-import { get } from '../utils/functions/get'
+import { get, getID } from '../utils/functions/get'
 import { HTTPMethod } from './getIdByOwner'
 import { useCORS } from 'nitro-cors'
 
 export default defineEventHandler(async (event) => {
+  console.log("GET LAST TIMESTAMP ROUTE")
   // Define CORS options
   const corsOptions = {
     methods: ['GET', 'POST', 'OPTIONS'] as HTTPMethod[],
@@ -23,7 +24,6 @@ export default defineEventHandler(async (event) => {
     return createError({ statusCode: 405, statusMessage: 'Method not allowed' })
   } else {
     try {
-      // Manually parsing the request body
       const body = await readBody(event)
 
       const schema = zod.object({
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
       const { id } = safeParse.data
 
       try {
-        const data = await get(id)
+        const data = await getID(id)
 
         if (!data) {
           return Response.json({ exists: false }, { status: 404 })
