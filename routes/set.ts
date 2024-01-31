@@ -6,7 +6,6 @@ import { HTTPMethod } from "./getIdByOwner"
 import { addresses } from "../utils/constants/contracts"
 import { idRegistryABI } from "../utils/abi/generated"
 import { publicClient } from "../utils/client/viemClient"
-import { getLastSetNameTimestamp, checkNameOwnership } from "../utils/utils"
 import { internalResponse } from "../utils/utils"
 
 export default defineEventHandler(async (event) => {
@@ -84,56 +83,56 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      console.log("TO OWNERSHIp")
-      let nameOwned
-      try {
-        nameOwned = await fetch("https://username-service-username-service-pr-6.up.railway.app/getUsernameById", {
-          method: "POST",
-          body: JSON.stringify({ id: parseResult.data.id }),
-          headers: { "Content-Type": "application/json" },
-        }).then((res) => res.json())
-      } catch (error) {
-        console.error("Error fetching username:", error)
-        return {
-          success: false,
-          error: "Unable to fetch username",
-          statusCode: 500,
-        }
-      }
+      // console.log("TO OWNERSHIp")
+      // let nameOwned
+      // try {
+      //   nameOwned = await fetch("https://username-service-username-service-pr-6.up.railway.app/getUsernameById", {
+      //     method: "POST",
+      //     body: JSON.stringify({ id: parseResult.data.id }),
+      //     headers: { "Content-Type": "application/json" },
+      //   }).then((res) => res.json())
+      // } catch (error) {
+      //   console.error("Error fetching username:", error)
+      //   return {
+      //     success: false,
+      //     error: "Unable to fetch username",
+      //     statusCode: 500,
+      //   }
+      // }
 
-      if (nameOwned && nameOwned.username) {
-        return { success: false, error: "Name already owned", statusCode: 400 }
-      }
+      // if (nameOwned && nameOwned.username) {
+      //   return { success: false, error: "Name already owned", statusCode: 400 }
+      // }
 
-      let lastSetTimestamp
+      // let lastSetTimestamp
 
-      try {
-        console.log("INSIDE GET LAST SET TIME")
-        const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
-          method: "POST",
-          body: JSON.stringify({ id: parseResult.data.id }),
-        })
+      // try {
+      //   console.log("INSIDE GET LAST SET TIME")
+      //   const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
+      //     method: "POST",
+      //     body: JSON.stringify({ id: parseResult.data.id }),
+      //   })
 
-        lastSetTimestamp = response.timestamp
-        console.log("TIMESTAMP", lastSetTimestamp)
+      //   lastSetTimestamp = response.timestamp
+      //   console.log("TIMESTAMP", lastSetTimestamp)
 
-        const secondsIn28Days = 2419200
-        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-          console.error("Name change not allowed within 28 days")
-          return {
-            success: false,
-            error: "Name change not allowed within 28 days",
-            statusCode: 400,
-          }
-        }
-      } catch (error) {
-        console.error("Error checking name ownership:", error)
-        return {
-          success: false,
-          error: "Error checking name ownership",
-          statusCode: 500,
-        }
-      }
+      //   const secondsIn28Days = 2419200
+      //   if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
+      //     console.error("Name change not allowed within 28 days")
+      //     return {
+      //       success: false,
+      //       error: "Name change not allowed within 28 days",
+      //       statusCode: 400,
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error("Error checking name ownership:", error)
+      //   return {
+      //     success: false,
+      //     error: "Error checking name ownership",
+      //     statusCode: 500,
+      //   }
+      // }
 
       // Validate signature
       try {
