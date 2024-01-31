@@ -218,10 +218,10 @@ export default defineEventHandler(async (event) => {
       // time stamp check
       const currentTimestamp = Math.floor(Date.now())
       console.log(currentTimestamp)
-      const providedTimestamp = parseInt(parseResult.data.timestamp || "0")
+      const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
       if (providedTimestamp > currentTimestamp + 60) {
-        console.error("Invalid timestamp")
-        return { success: false, error: "Invalid timestamp", statusCode: 400 }
+        console.error('Invalid timestamp')
+        return { success: false, error: 'Invalid timestamp', statusCode: 400 }
       }
 
       let ownerId
@@ -229,77 +229,82 @@ export default defineEventHandler(async (event) => {
         ownerId = await publicClient.readContract({
           address: addresses.idRegistry.river_j5bpjduqfv,
           abi: idRegistryABI,
-          functionName: "idOwnedBy",
+          functionName: 'idOwnedBy',
           args: [parseResult.data.owner as Hex],
         })
       } catch (error) {
-        console.error("Error fetching owner ID:", error)
+        console.error('Error fetching owner ID:', error)
         return {
           success: false,
-          error: "Error fetching owner ID",
+          error: 'Error fetching owner ID',
           statusCode: 500,
         }
       }
 
-      console.log("Fetched owner ID:", ownerId)
-      console.log("ID to check for", parseResult.data.id)
+      console.log('Fetched owner ID:', ownerId)
+      console.log('ID to check for', parseResult.data.id)
 
       if (ownerId.toString() !== parseResult.data.id) {
         return {
           success: false,
-          error: "Not the owner of the ID",
+          error: 'Not the owner of the ID',
           statusCode: 401,
         }
       }
 
-      console.log("TO OWNERSHIp")
+      console.log('TO OWNERSHIp')
       let nameOwned
       try {
-        nameOwned = await fetch("https://username-service-username-service-pr-6.up.railway.app/getUsernameById", {
-          method: "POST",
-          body: JSON.stringify({ id: parseResult.data.id }),
-          headers: { "Content-Type": "application/json" },
-        }).then((res) => res.json())
+        nameOwned = await fetch(
+          'https://username-service-username-service-pr-6.up.railway.app/getUsernameById',
+          {
+            method: 'POST',
+            body: JSON.stringify({ id: parseResult.data.id }),
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ).then((res) => res.json())
       } catch (error) {
-        console.error("Error fetching username:", error)
-        console.log("NAME OWNED", nameOwned)
+        console.error('Error fetching username:', error)
+        console.log('NAME OWNED', nameOwned)
         return {
           success: false,
-          error: "Unable to fetch username",
+          error: 'Unable to fetch username',
           statusCode: 500,
         }
       }
 
       let lastSetTimestamp
 
-      // try {
-      //   console.log("INSIDE GET LAST SET TIME")
-      //   const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
-      //     method: "POST",
-      //     body: JSON.stringify({ id: parseResult.data.id }),
-      //   })
+      try {
+        console.log('INSIDE GET LAST SET TIME')
+        const response: internalResponse = await $fetch(
+          'https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp',
+          {
+            method: 'POST',
+            body: JSON.stringify({ id: parseResult.data.id }),
+          },
+        )
 
-      //   lastSetTimestamp = response.timestamp
-      //   console.log("TIMESTAMP", lastSetTimestamp)
+        lastSetTimestamp = response.timestamp
+        console.log('TIMESTAMP', lastSetTimestamp)
 
-      //   const secondsIn28Days = 2419200
-      //   if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-      //     console.error("Name change not allowed within 28 days")
-      //     return {
-      //       success: false,
-      //       error: "Name change not allowed within 28 days",
-      //       statusCode: 400,
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.error("Error checking name ownership:", error)
-      //   return {
-      //     success: false,
-      //     error: "Error checking name ownership",
-      //     statusCode: 500,
-      //   }
-      // }
-
+        const secondsIn28Days = 2419200
+        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
+          console.error('Name change not allowed within 28 days')
+          return {
+            success: false,
+            error: 'Name change not allowed within 28 days',
+            statusCode: 400,
+          }
+        }
+      } catch (error) {
+        console.error('Error checking name ownership:', error)
+        return {
+          success: false,
+          error: 'Error checking name ownership',
+          statusCode: 500,
+        }
+      }
 
       // Validate signature
       try {

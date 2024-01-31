@@ -29,7 +29,7 @@ export async function get(name: string): Promise<Name | null> {
   }
 }
 
-export async function getID (id: string): Promise<Name | null> {
+export async function getID(id: string): Promise<Name | null> {
   ;('Entering getID function')
   try {
     const db = createKysely()

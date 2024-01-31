@@ -47,7 +47,7 @@ export function stringifyNameForDb(
 
   return stringifyName(name)
 
-   function stringifyName(name: Name) {
+  function stringifyName(name: Name) {
     return {
       id: name.id,
       name: name.name,
@@ -66,7 +66,7 @@ export interface internalResponse {
 
 export async function getLastSetNameTimestamp(id: string): Promise<string> {
   try {
-    console.log("INSIDE GET LAST SET TIME")
+    console.log('INSIDE GET LAST SET TIME')
     const response = await $fetch<internalResponse>('/getLastTimestamp', {
       method: 'POST',
       params: { id },
@@ -81,7 +81,7 @@ export async function getLastSetNameTimestamp(id: string): Promise<string> {
 
 export async function checkNameOwnership(id: string): Promise<boolean> {
   try {
-    console.log("INSIDE CHECKNAME")
+    console.log('INSIDE CHECKNAME')
     const response = await $fetch<internalResponse>('/getUsernameById', {
       method: 'POST',
       body: { id },
@@ -93,4 +93,3 @@ export async function checkNameOwnership(id: string): Promise<boolean> {
     throw new Error('Unable to fetch username')
   }
 }
-
