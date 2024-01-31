@@ -28,9 +28,13 @@ export default defineEventHandler(async (event) => {
 
       const schema = zod.object({
         id: zod.string(),
-      })
+      });
 
       const safeParse = schema.safeParse(body)
+      
+      if (!safeParse.success) {
+        return createError({ statusCode: 400, statusMessage: 'Invalid input' });
+      }
 
       if (!safeParse.success) {
         return Response.json({ error: 'Invalid input' }, { status: 400 })
@@ -50,8 +54,8 @@ export default defineEventHandler(async (event) => {
         return Response.json({ timestamp }, { status: 200 })
 
       } catch (error) {
-        console.error('Error fetching data:', error)
-        return Response.json({ error: 'Internal Server Error' }, { status: 500 })
+        console.error('Detailed error information:', error);
+        return createError({ statusCode: 500, statusMessage: 'Internal Server Error' });
       }
     } catch (e) {
       console.error('Error with Route', e)
