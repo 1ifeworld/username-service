@@ -252,6 +252,24 @@ export default defineEventHandler(async (event) => {
         }
       }
 
+      console.log("TO OWNERSHIp")
+      let nameOwned
+      try {
+        nameOwned = await fetch("https://username-service-username-service-pr-6.up.railway.app/getUsernameById", {
+          method: "POST",
+          body: JSON.stringify({ id: parseResult.data.id }),
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => res.json())
+      } catch (error) {
+        console.error("Error fetching username:", error)
+        return {
+          success: false,
+          error: "Unable to fetch username",
+          statusCode: 500,
+        }
+      }
+
+
       // Validate signature
       try {
         const messageToVerify = JSON.stringify(parseResult.data)
