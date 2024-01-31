@@ -30,7 +30,7 @@ export async function get(name: string): Promise<Name | null> {
 }
 
 export async function getID (id: string): Promise<Name | null> {
-  ;('Entering get function')
+  ;('Entering getID function')
   try {
     const db = createKysely()
     ;('Executing database query')
