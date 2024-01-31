@@ -1,16 +1,16 @@
-import zod from "zod"
-import { get, getID } from "../utils/functions/get"
-import { HTTPMethod } from "./getIdByOwner"
-import { useCORS } from "nitro-cors"
+import zod from 'zod'
+import { get, getID } from '../utils/functions/get'
+import { HTTPMethod } from './getIdByOwner'
+import { useCORS } from 'nitro-cors'
 
 export default defineEventHandler(async (event) => {
   // Define CORS options
   const corsOptions = {
-    methods: ["GET", "POST", "OPTIONS"] as HTTPMethod[],
+    methods: ['GET', 'POST', 'OPTIONS'] as HTTPMethod[],
     allowHeaders: [
-      "Authorization",
-      "Content-Type",
-      "Access-Control-Allow-Origin",
+      'Authorization',
+      'Content-Type',
+      'Access-Control-Allow-Origin',
     ],
     preflight: { statusCode: 204 },
   }
@@ -18,11 +18,11 @@ export default defineEventHandler(async (event) => {
   // Apply CORS to the request
   useCORS(event, corsOptions)
 
-  if (event.node.req.method === "OPTIONS") {
-  } else if (event.node.req.method !== "POST") {
+  if (event.node.req.method === 'OPTIONS') {
+  } else if (event.node.req.method !== 'POST') {
     return createError({
       statusCode: 405,
-      statusMessage: "Method not allowed",
+      statusMessage: 'Method not allowed',
     })
   } else {
     try {
@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
       try {
         body = await readBody(event)
       } catch (error) {
-        console.error("Error parsing request body:", error)
-        return { success: false, error: "Invalid request", statusCode: 400 }
+        console.error('Error parsing request body:', error)
+        return { success: false, error: 'Invalid request', statusCode: 400 }
       }
 
       const schema = zod.object({
@@ -41,11 +41,11 @@ export default defineEventHandler(async (event) => {
       const safeParse = schema.safeParse(body)
 
       if (!safeParse.success) {
-        return createError({ statusCode: 400, statusMessage: "Invalid input" })
+        return createError({ statusCode: 400, statusMessage: 'Invalid input' })
       }
 
       if (!safeParse.success) {
-        return Response.json({ error: "Invalid input" }, { status: 400 })
+        return Response.json({ error: 'Invalid input' }, { status: 400 })
       }
 
       const { id } = safeParse.data
@@ -61,14 +61,14 @@ export default defineEventHandler(async (event) => {
         const timestamp = data.timestamp
         return Response.json({ timestamp }, { status: 200 })
       } catch (error) {
-        console.error("Detailed error information:", error)
+        console.error('Detailed error information:', error)
         return createError({
           statusCode: 500,
-          statusMessage: "Internal Server Error",
+          statusMessage: 'Internal Server Error',
         })
       }
     } catch (e) {
-      console.error("Error with Route", e)
+      console.error('Error with Route', e)
     }
   }
 })
