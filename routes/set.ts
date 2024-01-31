@@ -272,33 +272,33 @@ export default defineEventHandler(async (event) => {
 
       let lastSetTimestamp
 
-      try {
-        console.log("INSIDE GET LAST SET TIME")
-        const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
-          method: "POST",
-          body: JSON.stringify({ id: parseResult.data.id }),
-        })
+      // try {
+      //   console.log("INSIDE GET LAST SET TIME")
+      //   const response: internalResponse = await $fetch("https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp", {
+      //     method: "POST",
+      //     body: JSON.stringify({ id: parseResult.data.id }),
+      //   })
 
-        lastSetTimestamp = response.timestamp
-        console.log("TIMESTAMP", lastSetTimestamp)
+      //   lastSetTimestamp = response.timestamp
+      //   console.log("TIMESTAMP", lastSetTimestamp)
 
-        const secondsIn28Days = 2419200
-        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-          console.error("Name change not allowed within 28 days")
-          return {
-            success: false,
-            error: "Name change not allowed within 28 days",
-            statusCode: 400,
-          }
-        }
-      } catch (error) {
-        console.error("Error checking name ownership:", error)
-        return {
-          success: false,
-          error: "Error checking name ownership",
-          statusCode: 500,
-        }
-      }
+      //   const secondsIn28Days = 2419200
+      //   if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
+      //     console.error("Name change not allowed within 28 days")
+      //     return {
+      //       success: false,
+      //       error: "Name change not allowed within 28 days",
+      //       statusCode: 400,
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error("Error checking name ownership:", error)
+      //   return {
+      //     success: false,
+      //     error: "Error checking name ownership",
+      //     statusCode: 500,
+      //   }
+      // }
 
 
       // Validate signature
