@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
           return Response.json({ exists: false }, { status: 404 })
         }
         console.log(nameData)
-        return Response.json({ nameData,  exists: true }, { status: 200 })
+        return Response.json({ ...nameData,  exists: true }, { status: 200 })
       } catch (error) {
         console.error("Error fetching name data:", error)
         return Response.json(
