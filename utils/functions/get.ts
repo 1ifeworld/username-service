@@ -19,7 +19,9 @@ export async function get(name: string): Promise<Name | null> {
       return null
     }
     ;('Parsing record from database')
-    return parseNameFromDb(record)
+    const returnRecord = parseNameFromDb(record)
+    console.log({returnRecord})
+    return returnRecord
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error caught in get function:', error, error.stack)
