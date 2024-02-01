@@ -10,7 +10,8 @@ export async function get(name: string): Promise<Name | null> {
     const record = await db
       .selectFrom('names')
       .selectAll()
-      .where('name', '=', name)
+      // temp
+      .where('name', '=', `${name}.sbvrsv.eth`)
       .executeTakeFirst()
 
     if (!record) {
