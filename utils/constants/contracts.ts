@@ -10,8 +10,6 @@ type AddressBook = {
 
 export const addresses: AddressBook = {
   idRegistry: {
-    opGoerli: '0xD1afC5DBC6870b17e598273dB2cC6bbA9233b905',
-    river_j5bpjduqfv: '0x339513226Afd92B309837Bad402c6D3ADDE9Ad24',
     nova: '0x339513226Afd92B309837Bad402c6D3ADDE9Ad24'
   },
   // delegateRegistry: {

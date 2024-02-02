@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
         console.error('Invalid input')
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
+      console.log("PARSE", parseResult.data.owner)
       // time stamp check
       const currentTimestamp = Math.floor(Date.now())
       console.log(currentTimestamp)
@@ -51,11 +52,10 @@ export default defineEventHandler(async (event) => {
         console.error('Invalid timestamp')
         return { success: false, error: 'Invalid timestamp', statusCode: 400 }
       }
-
       let ownerId
       try {
         ownerId = await publicClient.readContract({
-          address: addresses.idRegistry.nova,
+          address: '0x339513226Afd92B309837Bad402c6D3ADDE9Ad24',
           abi: idRegistryABI,
           functionName: 'idOf',
           args: [parseResult.data.owner as Hex],
