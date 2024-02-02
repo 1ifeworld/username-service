@@ -55,9 +55,9 @@ export default defineEventHandler(async (event) => {
       let ownerId
       try {
         ownerId = await publicClient.readContract({
-          address: addresses.idRegistry.river_j5bpjduqfv,
+          address: addresses.idRegistry.nova,
           abi: idRegistryABI,
-          functionName: 'idOwnedBy',
+          functionName: 'idOf',
           args: [parseResult.data.owner as Hex],
         })
       } catch (error) {
