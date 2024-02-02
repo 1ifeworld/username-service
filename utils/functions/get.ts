@@ -11,7 +11,7 @@ export async function get(name: string): Promise<Name | null> {
       .selectFrom('names')
       .selectAll()
       // temp
-      .where('name', '=', `${name}.sbvrsv.eth`)
+      .where('name', '=', name)
       .executeTakeFirst()
 
     if (!record) {
