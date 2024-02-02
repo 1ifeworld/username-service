@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
       try {
         nameOwned = await fetch(
-          'https://username-service-username-service-pr-6.up.railway.app/getUsernameById',
+          'https://username-service-production.up.railway.app/getUsernameById',
           {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
@@ -107,7 +107,7 @@ export default defineEventHandler(async (event) => {
       let lastSetTimestamp
       try {
         lastSetTimestamp = await fetch(
-          'https://username-service-username-service-pr-6.up.railway.app/getLastTimestamp',
+          'https://username-service-production.up.railway.app/getLastTimestamp',
           {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
