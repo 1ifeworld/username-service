@@ -82,6 +82,9 @@ export default defineEventHandler(async (event) => {
 
       console.log('TO OWNERSHIp')
       let nameOwned
+      console.log("not json", parseResult.data.id)
+      console.log("json", JSON.stringify({ id: parseResult.data.id }))
+
       try {
         nameOwned = await fetch(
           'https://username-service-username-service-pr-6.up.railway.app/getUsernameById',
