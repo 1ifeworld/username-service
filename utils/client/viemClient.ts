@@ -1,9 +1,9 @@
 import {  http, createPublicClient } from 'viem'
-import { arbitrumNova } from 'viem/chains'
+import { optimism } from 'viem/chains'
 
 
 export const publicClient = createPublicClient({
-  chain: arbitrumNova,
+  chain: optimism,
   transport: http(process.env.RPC_URL),
 })
 
