@@ -1,7 +1,7 @@
-import zod from "zod";
-import { get } from "../utils/functions/get";
-import { HTTPMethod } from "./getIdByOwner";
-import { useCORS } from "nitro-cors";
+import zod from "zod"
+import { get } from "../utils/functions/get"
+import { HTTPMethod } from "./getIdByOwner"
+import { useCORS } from "nitro-cors"
 
 export default defineEventHandler(async (event) => {
   console.log("ROUTE HIT")
@@ -14,17 +14,17 @@ export default defineEventHandler(async (event) => {
       "Access-Control-Allow-Origin",
     ],
     preflight: { statusCode: 204 },
-  };
+  }
 
   // Apply CORS to the request
-  useCORS(event, corsOptions);
+  useCORS(event, corsOptions)
 
   if (event.node.req.method === "OPTIONS") {
   } else if (event.node.req.method !== "POST") {
     return createError({
       statusCode: 405,
       statusMessage: "Method not allowed",
-    });
+    })
   } else {
     try {
       console.log("PARSING BODY")
@@ -36,14 +36,14 @@ export default defineEventHandler(async (event) => {
         username: zod
           .string()
           .regex(/^[a-z0-9-.]+$/, "Invalid username format"),
-      });
+      })
 
       const safeParse = schema.safeParse(body)
 
       console.log("SAFE PARSE", safeParse)
 
       if (!safeParse.success) {
-        const response = { error: "Invalid input" };
+        const response = { error: "Invalid input" }
         return Response.json(response, { status: 400 })
       }
 
@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
         return Response.json(
           { error: "Internal Server Error" },
           { status: 500 }
-        );
+        )
       }
     } catch (e) {
       console.error("Error with Route", e)
