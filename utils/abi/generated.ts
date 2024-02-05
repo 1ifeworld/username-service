@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const idRegistryABI = [
-  [
     {
       inputs: [
         { internalType: "address", name: "_initialOwner", type: "address" },
@@ -533,5 +532,4 @@ export const idRegistryABI = [
       stateMutability: "view",
       type: "function",
     },
-  ],
 ] as const
