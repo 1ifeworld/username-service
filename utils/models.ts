@@ -3,7 +3,7 @@ import z from 'zod'
 
 export const ZodName = z.object({
   id: z.string(), // Mandatory userId
-  name: z.string().regex(/^[a-z0-9][a-z0-9-]{0,20}$/), // Mandatory username
+  name: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,20}$/), // Mandatory username
   owner: z.string(), // Mandatory privy address
   signature: z.string(), // Mandatory ECDSA signature
   timestamp: z.string().optional(), // Optional unix timestamp
