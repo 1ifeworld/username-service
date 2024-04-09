@@ -78,6 +78,7 @@ export async function updateNameAndArchive(nameData: Name) {
           .where('id', '=', nameData.id)
           .execute()
       }
+    }
     })
   } catch (error) {
     console.error("Error in updating name and archiving:", error)
