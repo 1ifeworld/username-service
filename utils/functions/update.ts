@@ -47,11 +47,11 @@ export async function updateNameAndArchive(nameData: Name) {
                     await trx
                         .updateTable("historical_names")
                         .set({
-                            name: updatedNameArray,
-                            to: updatedToArray,
-                            owner: updatedOwnerArray,
-                            signature: updatedSignatureArray,
-                            timestamp: updatedTimestampArray
+                            name: sql.raw(`${sql.id('name')} || ARRAY[${sql.value(newEntries.name)}]`),
+                            to: sql.raw(`${sql.id('to')} || ARRAY[${sql.value(newEntries.to)}]`),
+                            owner: sql.raw(`${sql.id('owner')} || ARRAY[${sql.value(newEntries.owner)}]`),
+                            signature: sql.raw(`${sql.id('signature')} || ARRAY[${sql.value(newEntries.signature)}]`),
+                            timestamp: sql.raw(`${sql.id('timestamp')} || ARRAY[${sql.value(newEntries.timestamp)}]`),
                         })
                 .where("id", "=", nameData.id)
                 .execute()
