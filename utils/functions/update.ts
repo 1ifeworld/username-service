@@ -30,7 +30,7 @@ export async function updateNameAndArchive(nameData: Name) {
         await trx
           .insertInto("changelog")
           .values(
-            body,
+            body
           )
           .execute()
 
