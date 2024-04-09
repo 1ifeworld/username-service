@@ -40,22 +40,22 @@ export async function updateNameAndArchive(nameData: Name) {
           await trx
             .updateTable("historical_names")
             .set({
-                name: sql.raw(JSON.stringify([newEntries.name])),
-                to: sql.raw(JSON.stringify([newEntries.to])),
-                owner: sql.raw(JSON.stringify([newEntries.owner])),
-                signature:sql.raw(JSON.stringify([newEntries.signature])),
-                timestamp: sql.raw(JSON.stringify([newEntries.timestamp])),
+                name: sql.raw(JSON.stringify(newEntries.name)),
+                to: sql.raw(JSON.stringify(newEntries.to)),
+                owner: sql.raw(JSON.stringify(newEntries.owner)),
+                signature:sql.raw(JSON.stringify(newEntries.signature)),
+                timestamp: sql.raw(JSON.stringify(newEntries.timestamp)),
               })
             .where("id", "=", nameData.id)
             .execute()
         } else {
           await trx.insertInto("historical_names").values({
             id: nameData.id,
-            owner: JSON.stringify([newEntries.owner]),
-            to: JSON.stringify([newEntries.to]),
-            name: JSON.stringify([newEntries.name]),
-            signature: JSON.stringify([newEntries.signature]),
-            timestamp: JSON.stringify([newEntries.timestamp]),
+            owner: JSON.stringify(newEntries.owner),
+            to: JSON.stringify(newEntries.to),
+            name: JSON.stringify(newEntries.name),
+            signature: JSON.stringify(newEntries.signature),
+            timestamp: JSON.stringify(newEntries.timestamp),
           }).execute()
         }
 
