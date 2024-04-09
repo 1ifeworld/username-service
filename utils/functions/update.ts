@@ -37,20 +37,28 @@ export async function updateNameAndArchive(nameData: Name) {
           .executeTakeFirst()
 
             if (existingHistoricalRecord) {
-                const updatedNameArray = [...existingHistoricalRecord.name, newEntries.name]
-                const updatedToArray = [...existingHistoricalRecord.to, newEntries.to]
-                const updatedOwnerArray = [...existingHistoricalRecord.owner, newEntries.owner]
-                const updatedSignatureArray = [...existingHistoricalRecord.signature, newEntries.signature]
-                const updatedTimestampArray = [...existingHistoricalRecord.timestamp, newEntries.timestamp]
-                await trx
-                .updateTable("historical_names")
-                .set({
-                    name: updatedNameArray,
-                    to: updatedToArray,
-                    owner: updatedOwnerArray,
-                    signature: updatedSignatureArray,
-                    timestamp: updatedTimestampArray
-                })
+                if (existingHistoricalRecord) {
+                    const currentNameArray = Array.isArray(existingHistoricalRecord.name) ? existingHistoricalRecord.name : []
+                    const currentToArray = Array.isArray(existingHistoricalRecord.to) ? existingHistoricalRecord.to : []
+                    const currentOwnerArray = Array.isArray(existingHistoricalRecord.owner) ? existingHistoricalRecord.owner : []
+                    const currentSignatureArray = Array.isArray(existingHistoricalRecord.signature) ? existingHistoricalRecord.signature : []
+                    const currentTimestampArray = Array.isArray(existingHistoricalRecord.timestamp) ? existingHistoricalRecord.timestamp : []
+
+                    const updatedNameArray = [...currentNameArray, newEntries.name]
+                    const updatedToArray = [...currentToArray, newEntries.to]
+                    const updatedOwnerArray = [...currentOwnerArray, newEntries.owner]
+                    const updatedSignatureArray = [...currentSignatureArray, newEntries.signature]
+                    const updatedTimestampArray = [...currentTimestampArray, newEntries.timestamp]
+
+                    await trx
+                        .updateTable("historical_names")
+                        .set({
+                            name: updatedNameArray,
+                            to: updatedToArray,
+                            owner: updatedOwnerArray,
+                            signature: updatedSignatureArray,
+                            timestamp: updatedTimestampArray
+                        })
                 .where("id", "=", nameData.id)
                 .execute()
         } else {
