@@ -37,11 +37,11 @@ export async function updateNameAndArchive(nameData: Name) {
           .executeTakeFirst()
 
             if (existingHistoricalRecord) {
-                const updatedNameArray = [...existingHistoricalRecord.name, newEntries.name];
-                const updatedToArray = [...existingHistoricalRecord.to, newEntries.to];
-                const updatedOwnerArray = [...existingHistoricalRecord.owner, newEntries.owner];
-                const updatedSignatureArray = [...existingHistoricalRecord.signature, newEntries.signature];
-                const updatedTimestampArray = [...existingHistoricalRecord.timestamp, newEntries.timestamp];
+                const updatedNameArray = [...existingHistoricalRecord.name, newEntries.name]
+                const updatedToArray = [...existingHistoricalRecord.to, newEntries.to]
+                const updatedOwnerArray = [...existingHistoricalRecord.owner, newEntries.owner]
+                const updatedSignatureArray = [...existingHistoricalRecord.signature, newEntries.signature]
+                const updatedTimestampArray = [...existingHistoricalRecord.timestamp, newEntries.timestamp]
                 await trx
                 .updateTable("historical_names")
                 .set({
@@ -52,9 +52,8 @@ export async function updateNameAndArchive(nameData: Name) {
                     timestamp: updatedTimestampArray
                 })
                 .where("id", "=", nameData.id)
-                .execute();
+                .execute()
         } else {
-            // If no existing record, insert a new one
             await trx.insertInto("historical_names").values({
                 id: nameData.id,
                 name: [newEntries.name],
@@ -62,7 +61,7 @@ export async function updateNameAndArchive(nameData: Name) {
                 owner: [newEntries.owner],
                 signature: [newEntries.signature],
                 timestamp: [newEntries.timestamp]
-            }).execute();
+            }).execute()
         }
 
         await trx

@@ -33,11 +33,11 @@ export type HistoricalName = z.infer<typeof ZodHistoricalName>
 
 export interface HistoricalNameInKysely {
   id: string
-  name: string[]
-  owner: string[]
-  signature: string[]
-  timestamp: string[]
-  to: string[]
+  name: [string]
+  owner: [string]
+  signature: [string]
+  timestamp: [string]
+  to: [string]
 }
 
 export const ZodHistoricalName = z.object({
