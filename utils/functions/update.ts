@@ -1,45 +1,50 @@
-import { createKysely } from '../createKysely'
-import { Name } from './../models'
-import { stringifyNameForDb } from '../utils'
+import { createKysely } from "../createKysely"
+import { Name } from "./../models"
+import { stringifyNameForDb } from "../utils"
 
 export async function updateNameAndArchive(nameData: Name) {
-    const db = createKysely()
-    const body = stringifyNameForDb(nameData)
+  const db = createKysely()
+  const body = stringifyNameForDb(nameData)
 
+  try {
     await db.transaction().execute(async (trx) => {
-        const existingRecord = await trx
-            .selectFrom('names')
-            .selectAll()
-            .where('id', '=', nameData.id)
-            .executeTakeFirst()
+        const updateBody = { ...body }
+        delete updateBody.id
+      const existingNameRecord = await trx
+        .selectFrom("names")
+        .selectAll()
+        .where("id", "=", nameData.id)
+        .executeTakeFirst()
 
-        if (!existingRecord) {
-            throw new Error(`Record not found for ID: ${nameData.id}`)
+      if (!existingNameRecord) {
+        throw new Error(`Record not found for ID: ${nameData.id}`)
+      }
+
+      if (existingNameRecord.name !== nameData.name) {
+        const existingHistoricalRecord = await trx
+          .selectFrom("historical_names")
+          .where("id", "=", nameData.id)
+          .executeTakeFirst()
+
+        if (existingHistoricalRecord) {
+
+          await trx
+            .updateTable("historical_names")
+            .set(updateBody)
+            .where("id", "=", nameData.id)
+            .execute()
+        } else {
+          await trx.insertInto("historical_names").values(body).execute()
         }
-
-        if (existingRecord.name !== nameData.name) {
-            const historicalRecord = {
-                ...existingRecord,
-            }
-
-            const updatePayload = { ...body }
-            delete updatePayload.id
-
-            await trx
-                .insertInto('historical_names')
-                .values(updatePayload)
-                .where('id', '=', nameData.id)
-                .execute()
-
-
-            await trx
-                .updateTable('names')
-                .set(updatePayload)
-                .where('id', '=', nameData.id)
-                .execute()
-        }
-    }).catch((error) => {
-        console.error('Error in updating name and archiving:', error)
-        throw error
-    })
+      await trx
+        .updateTable('names')
+        .set(updateBody)
+        .where('id', '=', nameData.id)
+        .execute()
+  }
+})
+  } catch (error) {
+    console.error("Error in updating name and archiving:", error)
+    throw error
+  }
 }
