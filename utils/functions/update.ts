@@ -16,20 +16,21 @@ export async function updateNameAndArchive(nameData: Name) {
         if (!existingRecord) {
             throw new Error(`Record not found for ID: ${nameData.id}`)
         }
+
+        const updateBody = { ...body }
+        delete updateBody.id
+
         if (existingRecord.name !== nameData.name) {
-            const historicalRecord = {
-                ...existingRecord,
-            }
             await trx
-                .insertInto('historicalNames')
-                .values(historicalRecord)
+                .insertInto('historical_names')
+                .values({ ...existingRecord }) // Assuming historical_names has an 'archivedAt' or similar field
+                .execute()
+            await trx
+                .updateTable('names')
+                .set(updateBody)
+                .where('id', '=', nameData.id)
                 .execute()
         }
-        await trx
-            .updateTable('names')
-            .set(body)
-            .where('id', '=', nameData.id)
-            .execute()
     }).catch((error) => {
         console.error('Error in updating name and archiving:', error)
         throw error
