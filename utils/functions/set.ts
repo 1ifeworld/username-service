@@ -13,9 +13,12 @@ export async function set(nameData: Name) {
       .executeTakeFirst()
 
     if (existingRecord) {
+      const updateBody = { ...body }
+      delete updateBody.id
+
       await trx
         .updateTable('names')
-        .set({ name: nameData.name })
+        .set(updateBody)
         .where('id', '=', nameData.id)
         .execute()
     } else {
