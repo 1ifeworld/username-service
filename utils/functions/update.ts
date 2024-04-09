@@ -23,7 +23,7 @@ export async function updateNameAndArchive(nameData: Name) {
         if (existingRecord.name !== nameData.name) {
             await trx
                 .insertInto('historical_names')
-                .values({ ...existingRecord }) // Assuming historical_names has an 'archivedAt' or similar field
+                .values(updateBody)
                 .execute()
             await trx
                 .updateTable('names')
