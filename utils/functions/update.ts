@@ -16,7 +16,6 @@ export async function updateNameAndArchive(nameData: Name) {
         if (!existingRecord) {
             throw new Error(`Record not found for ID: ${nameData.id}`)
         }
-
         if (existingRecord.name !== nameData.name) {
             const historicalRecord = {
                 ...existingRecord,
@@ -26,8 +25,6 @@ export async function updateNameAndArchive(nameData: Name) {
                 .values(historicalRecord)
                 .execute()
         }
-
-
         await trx
             .updateTable('names')
             .set(body)
