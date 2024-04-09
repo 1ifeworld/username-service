@@ -38,12 +38,6 @@ export async function updateNameAndArchive(nameData: Name) {
 
             if (existingHistoricalRecord) {
                 if (existingHistoricalRecord) {
-
-                    const updatedNameArray = [...(existingHistoricalRecord.name || []), newEntries.name]
-                    const updatedToArray =  [...(existingHistoricalRecord.to || []), newEntries.to]
-                    const updatedOwnerArray = [...(existingHistoricalRecord.owner || []), newEntries.owner]
-                    const updatedSignatureArray =  [...(existingHistoricalRecord.signature || []), newEntries.signature]
-                    const updatedTimestampArray =  [...(existingHistoricalRecord.timestamp || []), newEntries.timestamp]
                     await trx
                         .updateTable("historical_names")
                         .set({
