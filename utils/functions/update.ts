@@ -36,27 +36,33 @@ export async function updateNameAndArchive(nameData: Name) {
           .where("id", "=", nameData.id)
           .executeTakeFirst()
 
-        if (existingHistoricalRecord) {
-          await trx
-            .updateTable("historical_names")
-            .set({
+            if (existingHistoricalRecord) {
+                const updatedNameArray = [...existingHistoricalRecord.name, newEntries.name];
+                const updatedToArray = [...existingHistoricalRecord.to, newEntries.to];
+                const updatedOwnerArray = [...existingHistoricalRecord.owner, newEntries.owner];
+                const updatedSignatureArray = [...existingHistoricalRecord.signature, newEntries.signature];
+                const updatedTimestampArray = [...existingHistoricalRecord.timestamp, newEntries.timestamp];
+                await trx
+                .updateTable("historical_names")
+                .set({
+                    name: updatedNameArray,
+                    to: updatedToArray,
+                    owner: updatedOwnerArray,
+                    signature: updatedSignatureArray,
+                    timestamp: updatedTimestampArray
+                })
+                .where("id", "=", nameData.id)
+                .execute();
+        } else {
+            // If no existing record, insert a new one
+            await trx.insertInto("historical_names").values({
+                id: nameData.id,
                 name: [newEntries.name],
                 to: [newEntries.to],
                 owner: [newEntries.owner],
                 signature: [newEntries.signature],
                 timestamp: [newEntries.timestamp]
-              })
-            .where("id", "=", nameData.id)
-            .execute()
-        } else {
-          await trx.insertInto("historical_names").values({
-            id: nameData.id,
-            name: [newEntries.name],
-            to: [newEntries.to],
-            owner: [newEntries.owner],
-            signature: [newEntries.signature],
-            timestamp: [newEntries.timestamp]
-          }).execute()
+            }).execute();
         }
 
         await trx
