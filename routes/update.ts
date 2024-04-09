@@ -33,14 +33,11 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
 
-      // Perform similar validations as in your set route, e.g., timestamp, owner ID, signature verification
-      // After validations, check if the name already belongs to the user (this prevents unnecessary archiving)
       const existingName = await get(parseResult.data.name)
       if (existingName && existingName.owner !== parseResult.data.owner) {
         return { success: false, error: 'Not the owner of the name', statusCode: 401 }
       }
 
-      // Update and archive the name
       try {
         await updateNameAndArchive(parseResult.data)
         return { success: true, statusCode: 200 }
