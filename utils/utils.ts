@@ -1,28 +1,28 @@
 import { Insertable, Selectable } from 'kysely'
 
-import { Name, NameInKysely, HistoricalName, HistoricalNameInKysely } from './models'
+import { Name, NameInKysely, Changelog, ChangelogInKysely } from './models'
 
 type SelectableKysely = Selectable<NameInKysely>;
 type InsertableKysely = Insertable<NameInKysely>;
-type SelectableHistoricalKysely = Selectable<HistoricalNameInKysely>;
-type InsertableHistoricalKysely = Insertable<HistoricalNameInKysely>;
+type SelectableChangelogKysely = Selectable<ChangelogInKysely>;
+type InsertableChangelogKysely = Insertable<ChangelogInKysely>;
 
-// Overloads for handling both Name and HistoricalName
-export function parseNameFromDb(flatName: SelectableKysely | SelectableHistoricalKysely): Name | HistoricalName;
-export function parseNameFromDb(flatName: (SelectableKysely | SelectableHistoricalKysely)[]): (Name | HistoricalName)[];
+// Overloads for handling both Name and Changelog
+export function parseNameFromDb(flatName: SelectableKysely | SelectableChangelogKysely): Name | Changelog;
+export function parseNameFromDb(flatName: (SelectableKysely | SelectableChangelogKysely)[]): (Name | Changelog)[];
 
 export function parseNameFromDb(
-  flatName: SelectableKysely | SelectableHistoricalKysely | (SelectableKysely | SelectableHistoricalKysely)[],
-): Name | HistoricalName | (Name | HistoricalName)[] {
+  flatName: SelectableKysely | SelectableChangelogKysely | (SelectableKysely | SelectableChangelogKysely)[],
+): Name | Changelog | (Name | Changelog)[] {
   if (Array.isArray(flatName)) {
     return flatName.map(parseName);
   }
 
   return parseName(flatName);
 
-  function parseName(name: SelectableKysely | SelectableHistoricalKysely) {
+  function parseName(name: SelectableKysely | SelectableChangelogKysely) {
     if ('name' in name && Array.isArray(name.name)) {
-      // Handling HistoricalName
+      // Handling Changelog
       return {
         id: name.id,
         name: name.name,
@@ -30,7 +30,7 @@ export function parseNameFromDb(
         signature: name.signature,
         timestamp: name.timestamp,
         to: name.to,
-      } as HistoricalName;
+      } as Changelog;
     } else {
       // Handling Name
       return {
@@ -45,22 +45,22 @@ export function parseNameFromDb(
   }
 }
 
-// Overloads for handling both Name and HistoricalName
-export function stringifyNameForDb(name: Name | HistoricalName): InsertableKysely | InsertableHistoricalKysely;
-export function stringifyNameForDb(name: (Name | HistoricalName)[]): (InsertableKysely | InsertableHistoricalKysely)[];
+// Overloads for handling both Name and Changelog
+export function stringifyNameForDb(name: Name | Changelog): InsertableKysely | InsertableChangelogKysely;
+export function stringifyNameForDb(name: (Name | Changelog)[]): (InsertableKysely | InsertableChangelogKysely)[];
 
 export function stringifyNameForDb(
-  name: Name | HistoricalName | (Name | HistoricalName)[],
-): InsertableKysely | InsertableHistoricalKysely | (InsertableKysely | InsertableHistoricalKysely)[] {
+  name: Name | Changelog | (Name | Changelog)[],
+): InsertableKysely | InsertableChangelogKysely | (InsertableKysely | InsertableChangelogKysely)[] {
   if (Array.isArray(name)) {
     return name.map(stringifyName);
   }
 
   return stringifyName(name);
 
-  function stringifyName(name: Name | HistoricalName) {
+  function stringifyName(name: Name | Changelog) {
     if ('name' in name && Array.isArray(name.name)) {
-      // Handling HistoricalName
+      // Handling Changelog
       return {
         id: name.id,
         name: name.name,
@@ -68,7 +68,7 @@ export function stringifyNameForDb(
         signature: name.signature,
         timestamp: name.timestamp,
         to: name.to,
-      } as InsertableHistoricalKysely;
+      } as InsertableChangelogKysely;
     } else {
       // Handling Name
       return {

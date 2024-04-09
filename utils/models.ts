@@ -28,10 +28,10 @@ export const ZodNameWithSignature = ZodName.extend({
 
 export type Name = z.infer<typeof ZodName>
 export type NameWithSignature = z.infer<typeof ZodNameWithSignature>
-export type HistoricalName = z.infer<typeof ZodHistoricalName>
+export type Changelog = z.infer<typeof ZodChangelog>
 
 
-export interface HistoricalNameInKysely {
+export interface ChangelogInKysely {
   id: string
   name: [string]
   owner: [string]
@@ -40,7 +40,7 @@ export interface HistoricalNameInKysely {
   to: [string]
 }
 
-export const ZodHistoricalName = z.object({
+export const ZodChangelog = z.object({
   id: z.string(), // Mandatory userId
   name: z.array(z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,20}$/)), // Array of usernames
   owner: z.array(z.string()), // Array of privy addresses
