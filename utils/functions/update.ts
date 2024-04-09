@@ -17,17 +17,24 @@ export async function updateNameAndArchive(nameData: Name) {
             throw new Error(`Record not found for ID: ${nameData.id}`)
         }
 
-        const updateBody = { ...body }
-        delete updateBody.id
-
         if (existingRecord.name !== nameData.name) {
+            const historicalRecord = {
+                ...existingRecord,
+            }
+
+            const updatePayload = { ...body }
+            delete updatePayload.id
+
             await trx
                 .insertInto('historical_names')
-                .values(updateBody)
+                .values(updatePayload)
+                .where('id', '=', nameData.id)
                 .execute()
+
+
             await trx
                 .updateTable('names')
-                .set(updateBody)
+                .set(updatePayload)
                 .where('id', '=', nameData.id)
                 .execute()
         }
