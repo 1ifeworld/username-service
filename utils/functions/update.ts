@@ -21,11 +21,11 @@ export async function updateNameAndArchive(nameData: Name) {
         const updatePromises = []
 
         Object.keys(body).forEach((field) => {
-          if (existingNameRecord[field] !== body[field]) {
+          if (field !== "id" && existingNameRecord[field] !== body[field]) {
             const historicalRecord = {
               id: nameData.id,
               field: field,
-              value: body[field],
+              value: JSON.stringify(body[field]),
               timestamp: new Date(),
             }
 
