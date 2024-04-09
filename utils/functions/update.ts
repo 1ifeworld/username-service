@@ -1,5 +1,6 @@
 import { createKysely } from "../createKysely"
 import { Name } from "../models"
+import { sql } from 'kysely'
 import { stringifyNameForDb } from "../utils"
 
 export async function updateNameAndArchive(nameData: Name) {
@@ -39,16 +40,15 @@ export async function updateNameAndArchive(nameData: Name) {
           await trx
             .updateTable("historical_names")
             .set({
-              name: trx.raw('name || ?', [JSON.stringify([newEntries.name])]),
-              to: trx.raw('to || ?', [JSON.stringify([newEntries.to])]),
-              owner: trx.raw('owner || ?', [JSON.stringify([newEntries.owner])]),
-              signature: trx.raw('signature || ?', [JSON.stringify([newEntries.signature])]),
-              timestamp: trx.raw('timestamp || ?', [JSON.stringify([newEntries.timestamp])]),
-            })
+                name: sql.raw(JSON.stringify([newEntries.name])),
+                to: sql.raw(JSON.stringify([newEntries.to])),
+                owner: sql.raw(JSON.stringify([newEntries.owner])),
+                signature:sql.raw(JSON.stringify([newEntries.signature])),
+                timestamp: sql.raw(JSON.stringify([newEntries.timestamp])),
+              })
             .where("id", "=", nameData.id)
             .execute()
         } else {
-          // If no historical record exists, create one with initial arrays
           await trx.insertInto("historical_names").values({
             id: nameData.id,
             owner: JSON.stringify([newEntries.owner]),
@@ -56,8 +56,6 @@ export async function updateNameAndArchive(nameData: Name) {
             name: JSON.stringify([newEntries.name]),
             signature: JSON.stringify([newEntries.signature]),
             timestamp: JSON.stringify([newEntries.timestamp]),
-
-            // Initialize other arrays as needed
           }).execute()
         }
 
