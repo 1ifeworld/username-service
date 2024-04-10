@@ -98,43 +98,6 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      let lastSetTimestamp
-      try {
-        lastSetTimestamp = await fetch(
-          'https://username-service-production.up.railway.app/getLastTimestamp',
-          {
-            method: 'POST',
-            body: JSON.stringify({ id: parseResult.data.id }),
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ).then((res) => res.json())
-
-        const secondsIn28Days = 2419200
-          // time stamp check
-          const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
-
-          const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
-
-          if (providedTimestamp > currentTimestampInSeconds + 60) {
-              return { success: false, error: 'Invalid timestamp', statusCode: 400 }
-          }
-        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-          console.error('Name change not allowed within 28 days')
-          return {
-            success: false,
-            error: 'Name change not allowed within 28 days',
-            statusCode: 400,
-          }
-        }
-      } catch (error) {
-        console.error('Error checking name ownership:', error)
-        return {
-          success: false,
-          error: 'Error checking name ownership',
-          statusCode: 500,
-        }
-      }
-
       // Validate signature
       try {
         const messageToVerify = JSON.stringify(parseResult.data)
@@ -154,18 +117,13 @@ export default defineEventHandler(async (event) => {
         return Response.json(response, { status: 401 })
       }
 
-      const existingName = await get(parseResult.data.name)
-      lastSetTimestamp = existingName ? parseInt(existingName.timestamp || '0') : 0
-      const secondsIn28Days = 2419200
-      const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
-      const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
-      if (providedTimestamp > currentTimestampInSeconds + 60) {
-          return { success: false, error: 'Invalid timestamp', statusCode: 400 }
-      }
+      validateTimestampWithin60Seconds(parseResult.data.timestamp)
 
-      if (existingName && providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-          return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
-      }
+      // Before proceeding with operations that depend on the 28-days rule
+      await validateNameChangeWithin28Days(parseResult.data.id, parseResult.data.timestamp)
+
+      // Assuming 'existingName' needs to be fetched here for further logic
+      const existingName = await get(parseResult.data.name)
 
       // Save the name
       try {
@@ -187,3 +145,43 @@ export default defineEventHandler(async (event) => {
     }
   }
 })
+
+function validateTimestampWithin60Seconds(providedTimestamp: string) {
+  const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
+  const timestamp = parseInt(providedTimestamp || '0')
+  if (timestamp > currentTimestampInSeconds + 60) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid timestamp' })
+  }
+}
+
+async function validateNameChangeWithin28Days(id: string, providedTimestamp: string) {
+  const lastSetTimestamp = await getLastTimestampById(id)
+  const secondsIn28Days = 2419200 // 28 days in seconds
+  const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
+  const timestamp = parseInt(providedTimestamp || '0')
+
+  if (timestamp - lastSetTimestamp < secondsIn28Days) {
+    throw createError({ statusCode: 400, statusMessage: 'Name change not allowed within 28 days' })
+  }
+}
+
+async function getLastTimestampById(id: string) {
+  try {
+    const response = await fetch(
+      'https://username-service-production.up.railway.app/getLastTimestamp',
+      {
+        method: 'POST',
+        body: JSON.stringify({ id }),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
+    if (!response.ok) {
+      throw new Error(`Failed to fetch last timestamp, status: ${response.status}`)
+    }
+    const data = await response.json()
+    return data.timestamp // Adjust this based on the actual structure of your response
+  } catch (error) {
+    console.error('Error fetching last timestamp:', error)
+    throw createError({ statusCode: 500, statusMessage: 'Error checking name ownership' })
+  }
+}
