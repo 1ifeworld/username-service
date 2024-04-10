@@ -4,6 +4,7 @@ import { set } from '../utils/functions/set'
 import { Hex, verifyMessage } from 'viem'
 import { useCORS } from 'nitro-cors'
 import { HTTPMethod } from './getIdByOwner'
+import { updateNameAndArchive } from '../utils/functions/update'
 
 export default defineEventHandler(async (event) => {
   // Define CORS options
@@ -45,13 +46,17 @@ export default defineEventHandler(async (event) => {
       }
       console.log("PARSE", parseResult.data.owner)
       // time stamp check
-      const currentTimestamp = Math.floor(Date.now())
-      console.log(currentTimestamp)
+      const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
       const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
-      if (providedTimestamp > currentTimestamp + 60) {
+      if (providedTimestamp > currentTimestampInSeconds + 60) {
+          return { success: false, error: 'Invalid timestamp', statusCode: 400 }
+      }
+
+      if (providedTimestamp > currentTimestampInSeconds + 60) {
         console.error('Invalid timestamp')
         return { success: false, error: 'Invalid timestamp', statusCode: 400 }
       }
+
       let ownerId
       try {
         ownerId = await publicClient.readContract({
@@ -137,6 +142,12 @@ export default defineEventHandler(async (event) => {
       try {
         const messageToVerify = JSON.stringify(parseResult.data)
 
+        const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
+        const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
+        if (providedTimestamp > currentTimestampInSeconds + 60) {
+            return { success: false, error: 'Invalid timestamp', statusCode: 400 }
+        }
+
         const isValidSignature = verifyMessage({
           address: parseResult.data.owner as Hex,
           signature: parseResult.data.signature as Hex,
@@ -152,19 +163,22 @@ export default defineEventHandler(async (event) => {
         return Response.json(response, { status: 401 })
       }
 
-      // Check if the name is already taken
       const existingName = await get(parseResult.data.name)
-      if (existingName && existingName.owner !== parseResult.data.owner) {
-        const response = { success: false, error: 'Name already taken' }
-        return Response.json(response, { status: 409 })
+      lastSetTimestamp = existingName ? parseInt(existingName.timestamp || '0') : 0
+      const secondsIn28Days = 2419200
+      if (existingName && providedTimestamp - lastSetTimestamp < secondsIn28Days) {
+          return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
       }
 
       // Save the name
       try {
+        if (existingName) {
+          await updateNameAndArchive({ ...parseResult.data, timestamp: currentTimestampInSeconds.toString() })
+      } else {
         await set(parseResult.data)
         const response = { success: true }
         return Response.json(response, { status: 201 })
-      } catch (err) {
+      } } catch (err) {
         console.error('Error caught in setName:', err)
         const errorMessage =
           err instanceof Error ? err.message : 'An unexpected error occurred'
