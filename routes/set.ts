@@ -188,124 +188,124 @@
 //   }
 // }
 
-import { ZodName } from '../utils/models';
-import { get } from '../utils/functions/get';
-import { set } from '../utils/functions/set';
-import { Hex, verifyMessage } from 'viem';
-import { useCORS } from 'nitro-cors';
-import { HTTPMethod } from './getIdByOwner';
-import { updateNameAndArchive } from '../utils/functions/update';
+import { ZodName } from '../utils/models'
+import { get } from '../utils/functions/get'
+import { set } from '../utils/functions/set'
+import { Hex, verifyMessage } from 'viem'
+import { useCORS } from 'nitro-cors'
+import { HTTPMethod } from './getIdByOwner'
+import { updateNameAndArchive } from '../utils/functions/update'
 
 export default defineEventHandler(async (event) => {
     const corsOptions = {
         methods: ['GET', 'POST', 'OPTIONS'] as HTTPMethod[],
         allowHeaders: ['Authorization', 'Content-Type', 'Access-Control-Allow-Origin'],
         preflight: { statusCode: 204 },
-    };
+    }
 
-    useCORS(event, corsOptions);
+    useCORS(event, corsOptions)
 
     if (event.node.req.method === 'OPTIONS') {
         // OPTIONS method is automatically handled by useCORS.
-        return;
+        return
     } else if (event.node.req.method !== 'POST') {
-        return { success: false, statusCode: 405, error: 'Method not allowed' };
+        return { success: false, statusCode: 405, error: 'Method not allowed' }
     }
 
-    let body;
+    let body
     try {
-        body = await readBody(event);
+        body = await readBody(event)
     } catch (error) {
-        return { success: false, error: 'Error parsing request body', statusCode: 400 };
+        return { success: false, error: 'Error parsing request body', statusCode: 400 }
     }
 
-    const parseResult = ZodName.safeParse(body);
+    const parseResult = ZodName.safeParse(body)
     if (!parseResult.success) {
-        return { success: false, error: 'Invalid input', statusCode: 400 };
+        return { success: false, error: 'Invalid input', statusCode: 400 }
     }
 
-    const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
-    const providedTimestamp = parseInt(parseResult.data.timestamp || '0');
+    const currentTimestampInSeconds = Math.floor(Date.now())
+    const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
     if (providedTimestamp > currentTimestampInSeconds + 60) {
-        return { success: false, error: 'Invalid timestamp', statusCode: 400 };
+        return { success: false, error: 'Invalid timestamp', statusCode: 400 }
     }
 
-    let ownerId;
+    let ownerId
     try {
         ownerId = await publicClient.readContract({
             address: addresses.idRegistry.optimism,
             abi: idRegistryABI,
             functionName: 'idOf',
             args: [parseResult.data.owner as Hex],
-        });
+        })
     } catch (error) {
-        return { success: false, error: 'Error fetching owner ID', statusCode: 500 };
+        return { success: false, error: 'Error fetching owner ID', statusCode: 500 }
     }
 
     if (ownerId.toString() !== parseResult.data.id) {
-        return { success: false, error: 'Not the owner of the ID', statusCode: 401 };
+        return { success: false, error: 'Not the owner of the ID', statusCode: 401 }
     }
 
-    let nameOwned;
+    let nameOwned
     try {
         const response = await fetch('https://username-service-production.up.railway.app/getUsernameById', {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
             headers: { 'Content-Type': 'application/json' },
-        });
+        })
         if (!response.ok) {
-            throw new Error('Failed to fetch username');
+            throw new Error('Failed to fetch username')
         }
-        nameOwned = await response.json();
+        nameOwned = await response.json()
     } catch (error) {
-        return { success: false, error: 'Unable to fetch username', statusCode: 500 };
+        return { success: false, error: 'Unable to fetch username', statusCode: 500 }
     }
 
     const isValidSignature = verifyMessage({
         address: parseResult.data.owner as Hex,
         signature: parseResult.data.signature as Hex,
         message: JSON.stringify(parseResult.data),
-    });
+    })
 
     if (!isValidSignature) {
-        return { success: false, error: 'Invalid signature', statusCode: 401 };
+        return { success: false, error: 'Invalid signature', statusCode: 401 }
     }
 
-    const existingName = await get(parseResult.data.name);
+    const existingName = await get(parseResult.data.name)
     if (existingName && existingName.owner !== parseResult.data.owner) {
-        return { success: false, error: 'Name already taken', statusCode: 409 };
+        return { success: false, error: 'Name already taken', statusCode: 409 }
     }
 
-    let lastSetTimestamp;
+    let lastSetTimestamp
     try {
         const response = await fetch('https://username-service-production.up.railway.app/getLastTimestamp', {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
             headers: { 'Content-Type': 'application/json' },
-        });
+        })
         if (!response.ok) {
-            throw new Error('Failed to fetch last timestamp');
+            throw new Error('Failed to fetch last timestamp')
         }
-        const data = await response.json();
-        lastSetTimestamp = data.timestamp;
+        const data = await response.json()
+        lastSetTimestamp = data.timestamp
     } catch (error) {
-        return { success: false, error: 'Unable to fetch last timestamp', statusCode: 500 };
+        return { success: false, error: 'Unable to fetch last timestamp', statusCode: 500 }
     }
 
-    const secondsIn14Days = 2419200/2; // 28 days in seconds
+    const secondsIn14Days = 2419200/2 // 28 days in seconds
     if (providedTimestamp - lastSetTimestamp < secondsIn14Days) {
-        return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 };
+        return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
     }
 
     try {
         if (existingName) {
-            await updateNameAndArchive(parseResult.data);
+            await updateNameAndArchive(parseResult.data)
         } else {
-            await set(parseResult.data);
+            await set(parseResult.data)
         }
-        return { success: true, statusCode: existingName ? 200 : 201 };
+        return { success: true, statusCode: existingName ? 200 : 201 }
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-        return { success: false, error: errorMessage, statusCode: 500 };
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+        return { success: false, error: errorMessage, statusCode: 500 }
     }
-});
+})
