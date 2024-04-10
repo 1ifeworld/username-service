@@ -45,17 +45,6 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
       console.log("PARSE", parseResult.data.owner)
-      // time stamp check
-      const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
-      const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
-      if (providedTimestamp > currentTimestampInSeconds + 60) {
-          return { success: false, error: 'Invalid timestamp', statusCode: 400 }
-      }
-
-      if (providedTimestamp > currentTimestampInSeconds + 60) {
-        console.error('Invalid timestamp')
-        return { success: false, error: 'Invalid timestamp', statusCode: 400 }
-      }
 
       let ownerId
       try {
@@ -121,6 +110,14 @@ export default defineEventHandler(async (event) => {
         ).then((res) => res.json())
 
         const secondsIn28Days = 2419200
+          // time stamp check
+          const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
+
+          const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
+
+          if (providedTimestamp > currentTimestampInSeconds + 60) {
+              return { success: false, error: 'Invalid timestamp', statusCode: 400 }
+          }
         if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
           console.error('Name change not allowed within 28 days')
           return {
@@ -142,12 +139,6 @@ export default defineEventHandler(async (event) => {
       try {
         const messageToVerify = JSON.stringify(parseResult.data)
 
-        const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
-        const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
-        if (providedTimestamp > currentTimestampInSeconds + 60) {
-            return { success: false, error: 'Invalid timestamp', statusCode: 400 }
-        }
-
         const isValidSignature = verifyMessage({
           address: parseResult.data.owner as Hex,
           signature: parseResult.data.signature as Hex,
@@ -166,6 +157,12 @@ export default defineEventHandler(async (event) => {
       const existingName = await get(parseResult.data.name)
       lastSetTimestamp = existingName ? parseInt(existingName.timestamp || '0') : 0
       const secondsIn28Days = 2419200
+      const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
+      const providedTimestamp = parseInt(parseResult.data.timestamp || '0')
+      if (providedTimestamp > currentTimestampInSeconds + 60) {
+          return { success: false, error: 'Invalid timestamp', statusCode: 400 }
+      }
+
       if (existingName && providedTimestamp - lastSetTimestamp < secondsIn28Days) {
           return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
       }
@@ -173,7 +170,7 @@ export default defineEventHandler(async (event) => {
       // Save the name
       try {
         if (existingName) {
-          await updateNameAndArchive({ ...parseResult.data, timestamp: currentTimestampInSeconds.toString() })
+          await updateNameAndArchive({ ...parseResult.data })
       } else {
         await set(parseResult.data)
         const response = { success: true }
