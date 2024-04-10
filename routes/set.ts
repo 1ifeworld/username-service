@@ -316,6 +316,7 @@ export default defineEventHandler(async (event) => {
 
       // Check if the name is already taken
       const existingName = await get(parseResult.data.name)
+      console.log({existingName})
       if (existingName && existingName.owner !== parseResult.data.owner) {
         const response = { success: false, error: 'Name already taken' }
         return Response.json(response, { status: 409 })
@@ -352,4 +353,4 @@ export default defineEventHandler(async (event) => {
       console.error('Error with Route', e)
     }
   }
-}) 
+})
