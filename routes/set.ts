@@ -317,6 +317,7 @@ export default defineEventHandler(async (event) => {
       // Check if the name is already taken
       const existingName = await get(parseResult.data.name)
       console.log({existingName})
+
       if (existingName && existingName.owner !== parseResult.data.owner) {
         const response = { success: false, error: 'Name already taken' }
         return Response.json(response, { status: 409 })
@@ -324,6 +325,9 @@ export default defineEventHandler(async (event) => {
 
 
         if (existingName) {
+          if (existingName && existingName.owner !== parseResult.data.owner) {
+            return { success: false, error: 'Not the owner of the name', statusCode: 401 }
+          }
         let lastSetTimestamp
           lastSetTimestamp = await fetch(
             'https://username-service-production.up.railway.app/getLastTimestamp',
@@ -341,14 +345,17 @@ export default defineEventHandler(async (event) => {
               error: 'Name change not allowed within 28 days',
               statusCode: 400,
             }
+          } else if (existingName) {
+            await updateNameAndArchive(parseResult.data)
+            return { success: true, statusCode: 200 }
+
           } else {
-            await updateNameAndArchive({ ...parseResult.data })
-          }
 
         await set(parseResult.data)
         const response = { success: true }
         return Response.json(response, { status: 201 })
       }
+    }
     } catch (e) {
       console.error('Error with Route', e)
     }
