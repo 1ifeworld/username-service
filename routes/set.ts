@@ -147,11 +147,13 @@ export default defineEventHandler(async (event) => {
 })
 
 function validateTimestampWithin60Seconds(providedTimestamp: string) {
-  const currentTimestampInSeconds = Math.floor(Date.now() / 1000)
-  const timestamp = parseInt(providedTimestamp || '0')
+  const currentTimestampInSeconds =  Math.floor(Date.now())
+  const timestamp = parseInt(providedTimestamp|| '0')
   if (timestamp > currentTimestampInSeconds + 60) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid timestamp' })
+    console.error('Invalid timestamp')
+    return { success: false, error: 'Invalid timestamp', statusCode: 400 }
   }
+
 }
 
 async function validateNameChangeWithin28Days(id: string, providedTimestamp: string) {
