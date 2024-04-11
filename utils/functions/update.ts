@@ -31,7 +31,7 @@ export async function setOrUpdate(nameData: Name) {
           .set(updateBody)
           .where('id', '=', nameData.id)
           .execute()
-      } else if (!existingNameRecord.id) {
+      } else if (!existingNameRecord.name && !existingNameRecord.id) {
         await trx
           .insertInto('names')
           .values(body)
