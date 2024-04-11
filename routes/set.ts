@@ -303,14 +303,8 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        if (existingName) {
             await updateNameAndArchive(parseResult.data)
             console.log("update")
-        } else {
-            await set(parseResult.data)
-            console.log("we're setting")
-
-        }
         return { success: true, statusCode: existingName ? 200 : 201 }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'

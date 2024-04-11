@@ -41,6 +41,12 @@ export async function updateNameAndArchive(nameData: Name) {
           .where("id", "=", nameData.id)
           .execute()
       }
+      else {
+        await trx
+        .insertInto('names')
+        .values(body)
+        .execute()
+      }
     })
   } catch (error) {
     console.error("Error in updating name and archiving:", error)
