@@ -31,12 +31,16 @@ export async function setOrUpdate(nameData: Name) {
           .set(updateBody)
           .where('id', '=', nameData.id)
           .execute()
-      } else {
-        await trx.insertInto('names').values(body).execute()
+      } else if (!existingNameRecord.id) {
+        await trx
+          .insertInto('names')
+          .values(body)
+          .onConflict((oc) => oc.column('name').doUpdateSet(body))
+          .execute()
       }
     })
   } catch (error) {
-    console.error('Error in updating name and archiving:', error)
+    console.error('Error in setting name:', error)
     throw error
   }
 }
