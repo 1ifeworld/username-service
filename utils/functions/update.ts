@@ -7,6 +7,7 @@ export async function updateNameAndArchive(nameData: Name) {
   const body = stringifyNameForDb(nameData)
 
   try {
+    console.log("in updateNameAndArchive")
     await db.transaction().execute(async (trx) => {
       const updateBody = { ...body }
       delete updateBody.id

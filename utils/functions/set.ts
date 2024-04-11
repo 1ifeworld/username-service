@@ -42,6 +42,7 @@ export async function set(nameData: Name) {
   const body = stringifyNameForDb(nameData)
 
   try {
+    console.log("in set function")
     await db
       .insertInto('names')
       .values(body)

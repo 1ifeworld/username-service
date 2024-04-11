@@ -232,6 +232,7 @@ export default defineEventHandler(async (event) => {
 
     let ownerId
     try {
+      console.log("owner id check")
         ownerId = await publicClient.readContract({
             address: addresses.idRegistry.optimism,
             abi: idRegistryABI,
@@ -248,6 +249,7 @@ export default defineEventHandler(async (event) => {
 
     let nameOwned
     try {
+      console.log("name owned ")
         const response = await fetch('https://username-service-production.up.railway.app/getUsernameById', {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
@@ -272,12 +274,15 @@ export default defineEventHandler(async (event) => {
     }
 
     const existingName = await get(parseResult.data.name)
+    console.log("existing name")
     if (existingName && existingName.owner !== parseResult.data.owner) {
         return { success: false, error: 'Name already taken', statusCode: 409 }
     }
 
+
     let lastSetTimestamp
     try {
+      console.log("time stamp checks")
         const response = await fetch('https://username-service-production.up.railway.app/getLastTimestamp', {
             method: 'POST',
             body: JSON.stringify({ id: parseResult.data.id }),
@@ -292,7 +297,7 @@ export default defineEventHandler(async (event) => {
         return { success: false, error: 'Unable to fetch last timestamp', statusCode: 500 }
     }
 
-    const secondsIn14Days = 2419200/2 // 28 days in seconds
+    const secondsIn14Days = 2419200/2 // 14 days in seconds
     if (providedTimestamp - lastSetTimestamp < secondsIn14Days) {
         return { success: false, error: 'Name change not allowed within 28 days', statusCode: 400 }
     }
@@ -300,8 +305,11 @@ export default defineEventHandler(async (event) => {
     try {
         if (existingName) {
             await updateNameAndArchive(parseResult.data)
+            console.log("update")
         } else {
             await set(parseResult.data)
+            console.log("we're setting")
+
         }
         return { success: true, statusCode: existingName ? 200 : 201 }
     } catch (error) {
