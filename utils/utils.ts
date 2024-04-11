@@ -105,7 +105,6 @@ export interface internalResponse {
 
 export async function getLastSetNameTimestamp(id: string): Promise<string> {
   try {
-    console.log('INSIDE GET LAST SET TIME')
     const response = await $fetch<internalResponse>('/getLastTimestamp', {
       method: 'POST',
       params: { id },
@@ -120,7 +119,6 @@ export async function getLastSetNameTimestamp(id: string): Promise<string> {
 
 export async function checkNameOwnership(id: string): Promise<boolean> {
   try {
-    console.log('INSIDE CHECKNAME')
     const response = await $fetch<internalResponse>('/getUsernameById', {
       method: 'POST',
       body: { id },

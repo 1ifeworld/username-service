@@ -104,35 +104,6 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      // let lastSetTimestamp
-      // try {
-      //   lastSetTimestamp = await fetch(
-      //     'https://username-service-production.up.railway.app/getLastTimestamp',
-      //     {
-      //       method: 'POST',
-      //       body: JSON.stringify({ id: parseResult.data.id }),
-      //       headers: { 'Content-Type': 'application/json' },
-      //     },
-      //   ).then((res) => res.json())
-
-      //   const secondsIn14Days = 2419200 / 2
-      //   if (providedTimestamp - lastSetTimestamp < secondsIn14Days) {
-      //     console.error('Name change not allowed within 28 days')
-      //     return {
-      //       success: false,
-      //       error: 'Name change not allowed within 28 days',
-      //       statusCode: 400,
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.error('Error checking name ownership:', error)
-      //   return {
-      //     success: false,
-      //     error: 'Error checking name ownership',
-      //     statusCode: 500,
-      //   }
-      // }
-
       // Validate signature
       try {
         const messageToVerify = JSON.stringify(parseResult.data)

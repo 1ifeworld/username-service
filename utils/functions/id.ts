@@ -1,10 +1,8 @@
 import { createKysely } from '../createKysely'
 
 export async function getIdByOwner(owner: string): Promise<string | null> {
-  console.log('Entering getIdByOwner function')
   try {
     const db = createKysely()
-    console.log('Executing database query')
     const record = await db
       .selectFrom('names')
       .select('id') // Just select the 'id' column
