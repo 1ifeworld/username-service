@@ -19,6 +19,7 @@ export async function setOrUpdate(nameData: Name) {
         .executeTakeFirst()
 
       if (existingNameRecord.name !== nameData.name) {
+        console.log("update condition hit")
         await trx
           .selectFrom('changelog')
           .where('id', '=', nameData.id)
@@ -32,6 +33,7 @@ export async function setOrUpdate(nameData: Name) {
           .where('id', '=', nameData.id)
           .execute()
       } else if (!existingNameRecord.name && !existingNameRecord.id) {
+        console.log("set condition hit")
         await trx
           .insertInto('names')
           .values(body)
