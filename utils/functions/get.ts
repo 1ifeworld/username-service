@@ -20,7 +20,7 @@ export async function get(name: string): Promise<Name | null> {
     }
     ;('Parsing record from database')
     const returnRecord = parseNameFromDb(record)
-    console.log({returnRecord})
+    console.log({ returnRecord })
     return returnRecord
   } catch (error) {
     if (error instanceof Error) {

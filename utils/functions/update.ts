@@ -1,21 +1,21 @@
-import { createKysely } from "../createKysely"
-import { Name } from "../models"
-import { stringifyNameForDb } from "../utils"
+import { createKysely } from '../createKysely'
+import { Name } from '../models'
+import { stringifyNameForDb } from '../utils'
 
-export async function updateNameAndArchive(nameData: Name) {
+export async function setOrUpdate(nameData: Name) {
   const db = createKysely()
   const body = stringifyNameForDb(nameData)
 
   try {
-    console.log("in updateNameAndArchive")
+    console.log('in updateNameAndArchive')
     await db.transaction().execute(async (trx) => {
       const updateBody = { ...body }
       delete updateBody.id
 
       const existingNameRecord = await trx
-        .selectFrom("names")
+        .selectFrom('names')
         .selectAll()
-        .where("id", "=", nameData.id)
+        .where('id', '=', nameData.id)
         .executeTakeFirst()
 
       if (!existingNameRecord) {
@@ -24,32 +24,23 @@ export async function updateNameAndArchive(nameData: Name) {
 
       if (existingNameRecord.name !== nameData.name) {
         await trx
-          .selectFrom("changelog")
-          .where("id", "=", nameData.id)
+          .selectFrom('changelog')
+          .where('id', '=', nameData.id)
           .executeTakeFirst()
 
-        await trx
-          .insertInto("changelog")
-          .values(
-            body
-          )
-          .execute()
+        await trx.insertInto('changelog').values(body).execute()
 
         await trx
-          .updateTable("names")
+          .updateTable('names')
           .set(updateBody)
-          .where("id", "=", nameData.id)
+          .where('id', '=', nameData.id)
           .execute()
-      }
-      else {
-        await trx
-        .insertInto('names')
-        .values(body)
-        .execute()
+      } else {
+        await trx.insertInto('names').values(body).execute()
       }
     })
   } catch (error) {
-    console.error("Error in updating name and archiving:", error)
+    console.error('Error in updating name and archiving:', error)
     throw error
   }
 }

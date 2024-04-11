@@ -30,7 +30,6 @@ export type Name = z.infer<typeof ZodName>
 export type NameWithSignature = z.infer<typeof ZodNameWithSignature>
 export type Changelog = z.infer<typeof ZodChangelog>
 
-
 export interface ChangelogInKysely {
   id: string
   name: string
@@ -48,5 +47,3 @@ export const ZodChangelog = z.object({
   timestamp: z.string().optional(), // Optional unix timestamp
   to: z.string().optional(), // Optional '' for unregistering a new username
 })
-
-
