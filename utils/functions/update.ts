@@ -10,7 +10,7 @@ export async function setOrUpdate(nameData: Name) {
     console.log('in updateNameAndArchive')
     await db.transaction().execute(async (trx) => {
       const updateBody = { ...body }
-      delete updateBody.id
+      delete updateBody.id  
 
       const existingNameRecord = await trx
         .selectFrom('names')
@@ -18,12 +18,8 @@ export async function setOrUpdate(nameData: Name) {
         .where('id', '=', nameData.id)
         .executeTakeFirst()
 
-      if (existingNameRecord.name !== nameData.name) {
+      if (existingNameRecord && existingNameRecord.name !== nameData.name) {
         console.log("update condition hit")
-        await trx
-          .selectFrom('changelog')
-          .where('id', '=', nameData.id)
-          .executeTakeFirst()
 
         await trx.insertInto('changelog').values(body).execute()
 
@@ -32,13 +28,13 @@ export async function setOrUpdate(nameData: Name) {
           .set(updateBody)
           .where('id', '=', nameData.id)
           .execute()
-      } else if (!existingNameRecord.name && !existingNameRecord.id) {
+      } else if (!existingNameRecord) {
         console.log("set condition hit")
         await trx
-          .insertInto('names')
-          .values(body)
-          .onConflict((oc) => oc.column('name').doUpdateSet(body))
-          .execute()
+        .insertInto('names')
+        .values(body)
+        .onConflict((oc) => oc.column('name').doUpdateSet(body))
+        .execute()
       }
     })
   } catch (error) {
