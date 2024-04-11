@@ -18,10 +18,6 @@ export async function setOrUpdate(nameData: Name) {
         .where('id', '=', nameData.id)
         .executeTakeFirst()
 
-      if (!existingNameRecord) {
-        throw new Error(`Record not found for ID: ${nameData.id}`)
-      }
-
       if (existingNameRecord.name !== nameData.name) {
         await trx
           .selectFrom('changelog')
