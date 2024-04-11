@@ -300,37 +300,38 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      let lastSetTimestamp
-      try {
-        console.log('time stamp checks')
-        const response = await fetch(
-          'https://username-service-production.up.railway.app/getLastTimestamp',
-          {
-            method: 'POST',
-            body: JSON.stringify({ id: parseResult.data.id }),
-            headers: { 'Content-Type': 'application/json' },
-          },
-        )
-        if (!response.ok) {
-          throw new Error('Failed to fetch last timestamp')
-        }
-        const data = await response.json()
-        lastSetTimestamp = data.timestamp
-      } catch (error) {
-        return {
-          success: false,
-          error: 'Unable to fetch last timestamp',
-          statusCode: 500,
-        }
-      }
-      const secondsIn14Days = 2419200 / 2 // 14 days in seconds
-      if (providedTimestamp - lastSetTimestamp < secondsIn14Days) {
-        return {
-          success: false,
-          error: 'Name change not allowed within 28 days',
-          statusCode: 400,
-        }
-      }
+      // let lastSetTimestamp
+      // try {
+      //   console.log('time stamp checks')
+      //   const response = await fetch(
+      //     'https://username-service-production.up.railway.app/getLastTimestamp',
+      //     {
+      //       method: 'POST',
+      //       body: JSON.stringify({ id: parseResult.data.id }),
+      //       headers: { 'Content-Type': 'application/json' },
+      //     },
+      //   )
+      //   if (!response.ok) {
+      //     throw new Error('Failed to fetch last timestamp')
+      //   }
+      //   const data = await response.json()
+      //   lastSetTimestamp = data.timestamp
+      // } catch (error) {
+      //   return {
+      //     success: false,
+      //     error: 'Unable to fetch last timestamp',
+      //     statusCode: 500,
+      //   }
+      // }
+      // const secondsIn14Days = 2419200 / 2 // 14 days in seconds
+      // if (providedTimestamp - lastSetTimestamp < secondsIn14Days) {
+      //   return {
+      //     success: false,
+      //     error: 'Name change not allowed within 28 days',
+      //     statusCode: 400,
+      //   }
+      // }
+      // signature checks
       const isValidSignature = verifyMessage({
         address: parseResult.data.owner as Hex,
         signature: parseResult.data.signature as Hex,
