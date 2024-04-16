@@ -26,7 +26,6 @@ export default defineEventHandler(async (event) => {
       const schema = zod.object({
         field: zod.string(),
         value: zod.union([zod.string(), zod.number()]),
-        fields: zod.array(zod.string()),
       })
 
       const validationResult = schema.safeParse(body)
@@ -36,9 +35,9 @@ export default defineEventHandler(async (event) => {
         return Response.json({ Error }, { status: 400 })
       }
 
-      const { field, value, fields } = validationResult.data
+      const { field, value } = validationResult.data
 
-      const record = await getAllFields(fields, field, value)
+      const record = await getAllFields( field, value)
 
       if (!record) {
         return Response.json({ error: 'No record found' }, { status: 404 })

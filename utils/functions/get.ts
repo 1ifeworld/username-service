@@ -61,7 +61,6 @@ export async function getID(id: string): Promise<Name | null> {
 
 
 export async function getAllFields(
-  fields: string[],
   field: string,
   value: string | number,
 ): Promise<Partial<Name> | null> {
@@ -71,7 +70,7 @@ export async function getAllFields(
     console.log('Executing database query with specific fields')
     const record = await db
       .selectFrom('names')
-      .select(fields)
+      .select(field)
       .where(field, '=', value)
       .executeTakeFirst()
 
