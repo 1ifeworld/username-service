@@ -59,31 +59,27 @@ export async function getID(id: string): Promise<Name | null> {
   }
 }
 
-
-export async function getAllFields(
-  field: string,
-  value: string | number,
-): Promise<Partial<Name> | null> {
-  console.log('Entering getSpecificFields function')
+export async function getAllFields(field: string): Promise<Array<string | number> | null> {
+  console.log('Entering getAllFields function')
   try {
     const db = createKysely()
-    console.log('Executing database query with specific fields')
-    const record = await db
+    console.log('Executing database query to get all values from a field')
+    const records = await db
       .selectFrom('names')
       .select(field)
-      .where(field, '=', value)
-      .executeTakeFirst()
+      .execute()
 
-    if (!record) {
-      console.log('No record found')
+    if (!records || records.length === 0) {
+      console.log('No records found')
       return null
     }
-    console.log('Parsing record from database')
-    const returnRecord = parseNameFromDb(record)
-    console.log({ returnRecord })
-    return returnRecord
+
+    console.log('Retrieved records:', records)
+    const values = records.map(record => record[field])
+    console.log({ values })
+    return values
   } catch (error) {
-    console.error('Error caught in getSpecificFields function:', error)
+    console.error('Error caught in getAllFields function:', error)
     throw error
   }
 }
