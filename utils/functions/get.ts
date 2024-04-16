@@ -58,3 +58,33 @@ export async function getID(id: string): Promise<Name | null> {
     throw error // Re-throw the error to be handled by the calling function
   }
 }
+
+
+export async function getAllFields(
+  fields: string[],
+  field: string,
+  value: string | number,
+): Promise<Partial<Name> | null> {
+  console.log('Entering getSpecificFields function')
+  try {
+    const db = createKysely()
+    console.log('Executing database query with specific fields')
+    const record = await db
+      .selectFrom('names')
+      .select(fields)
+      .where(field, '=', value)
+      .executeTakeFirst()
+
+    if (!record) {
+      console.log('No record found')
+      return null
+    }
+    console.log('Parsing record from database')
+    const returnRecord = parseNameFromDb(record)
+    console.log({ returnRecord })
+    return returnRecord
+  } catch (error) {
+    console.error('Error caught in getSpecificFields function:', error)
+    throw error
+  }
+}
