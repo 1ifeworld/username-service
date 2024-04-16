@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
       })
 
       const validationResult = schema.safeParse(body)
+      console.log(validationResult)
 
       if (!validationResult.success) {
         return Response.json({ Error }, { status: 400 })
