@@ -45,6 +45,8 @@ export async function setOrUpdate(nameData: Name) {
             .execute()
         }
       } else if (!existingNameRecord) {
+        await trx.insertInto('changelog').values(body).execute()
+        
         await trx.insertInto('names').values(body).execute()
       }
     })
