@@ -1,74 +1,85 @@
-import zod from "zod"
-import { get } from "../utils/functions/get"
-import { HTTPMethod } from "./getIdByOwner"
-import { useCORS } from "nitro-cors"
+import { createKysely } from '../createKysely'
+import { Name } from '../models'
+import { parseNameFromDb } from '../utils'
 
-export default defineEventHandler(async (event) => {
-  console.log("ROUTE HIT")
-  // Define CORS options
-  const corsOptions = {
-    methods: ["GET", "POST", "OPTIONS"] as HTTPMethod[],
-    allowHeaders: [
-      "Authorization",
-      "Content-Type",
-      "Access-Control-Allow-Origin",
-    ],
-    preflight: { statusCode: 204 },
-  }
+export async function get(name: string): Promise<Name | null> {
+  ;('Entering get function')
+  try {
+    const db = createKysely()
+    ;('Executing database query')
+    const record = await db
+      .selectFrom('names')
+      .selectAll()
+      // temp
+      .where('name', '=', name)
+      .executeTakeFirst()
 
-  // Apply CORS to the request
-  useCORS(event, corsOptions)
-
-  if (event.node.req.method === "OPTIONS") {
-  } else if (event.node.req.method !== "POST") {
-    return createError({
-      statusCode: 405,
-      statusMessage: "Method not allowed",
-    })
-  } else {
-    try {
-      console.log("PARSING BODY")
-      // Using readBody to parse the request body
-      const body = await readBody(event)
-      console.log("BODY", body)
-
-      const schema = zod.object({
-        username: zod
-          .string()
-          .regex(/^[a-z0-9-.]+$/, "Invalid username format"),
-      })
-
-      const safeParse = schema.safeParse(body)
-
-      console.log("SAFE PARSE", safeParse)
-
-      if (!safeParse.success) {
-        const response = { error: "Invalid input" }
-        return Response.json(response, { status: 400 })
-      }
-
-      const { username } = safeParse.data
-
-      console.log("USERNAME", username)
-
-      try {
-        const nameData = await get(username)
-        console.log({nameData})
-
-        if (nameData === null) {
-          return Response.json({ exists: false }, { status: 404 })
-        }
-        console.log(nameData)
-        return Response.json({ ...nameData,  exists: true }, { status: 200 })
-      } catch (error) {
-        console.error("Error fetching name data:", error)
-        return Response.json(
-          { error: "Internal Server Error" },
-          { status: 500 }
-        )
-      }
-    } catch (e) {
-      console.error("Error with Route", e)
+    if (!record) {
+      ;('No record found')
+      return null
     }
+    ;('Parsing record from database')
+    const returnRecord = parseNameFromDb(record)
+    console.log({returnRecord})
+    return returnRecord
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error caught in get function:', error, error.stack)
+    } else {
+      console.error('Error caught in get function:', error)
+    }
+    throw error // Re-throw the error to be handled by the calling function
   }
-})
+}
+
+export async function getID(id: string): Promise<Name | null> {
+  ;('Entering getID function')
+  try {
+    const db = createKysely()
+    ;('Executing database query')
+    const record = await db
+      .selectFrom('names')
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirst()
+
+    if (!record) {
+      ;('No record found')
+      return null
+    }
+    ;('Parsing record from database')
+    return parseNameFromDb(record)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error caught in get function:', error, error.stack)
+    } else {
+      console.error('Error caught in get function:', error)
+    }
+    throw error // Re-throw the error to be handled by the calling function
+  }
+}
+
+export async function getAllFields(field: string): Promise<Array<string | number> | null> {
+  console.log('Entering getAllFields function')
+  try {
+    const db = createKysely()
+    console.log('Executing database query to get all values from a field')
+    const records = await db
+      .selectFrom('names')
+      .select(field)
+      .execute()
+
+    if (!records || records.length === 0) {
+      console.log('No records found')
+      return null
+    }
+
+    console.log('Retrieved records:', records)
+    const values = records.map(record => record[field])
+    console.log({ values })
+    return values
+  } catch (error) {
+    console.error('Error caught in getAllFields function:', error)
+    throw error
+  }
+}
