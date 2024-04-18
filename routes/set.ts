@@ -1,9 +1,9 @@
 import { ZodName } from '../utils/models'
 import { get } from '../utils/functions/get'
-import { set } from '../utils/functions/set'
 import { Hex, verifyMessage } from 'viem'
 import { useCORS } from 'nitro-cors'
 import { HTTPMethod } from './getIdByOwner'
+import { setOrUpdate } from '../utils/functions/setOrupdate'
 
 export default defineEventHandler(async (event) => {
   // Define CORS options
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
         console.error('Invalid input')
         return { success: false, error: 'Invalid input', statusCode: 400 }
       }
-      console.log("PARSE", parseResult.data.owner)
+      console.log('PARSE', parseResult.data.owner)
       // time stamp check
       const currentTimestamp = Math.floor(Date.now())
       console.log(currentTimestamp)
@@ -82,8 +82,8 @@ export default defineEventHandler(async (event) => {
 
       console.log('TO OWNERSHIp')
       let nameOwned
-      console.log("not json", parseResult.data.id)
-      console.log("json", JSON.stringify({ id: parseResult.data.id }))
+      console.log('not json', parseResult.data.id)
+      console.log('json', JSON.stringify({ id: parseResult.data.id }))
 
       try {
         nameOwned = await fetch(
@@ -100,35 +100,6 @@ export default defineEventHandler(async (event) => {
         return {
           success: false,
           error: 'Unable to fetch username',
-          statusCode: 500,
-        }
-      }
-
-      let lastSetTimestamp
-      try {
-        lastSetTimestamp = await fetch(
-          'https://username-service-production.up.railway.app/getLastTimestamp',
-          {
-            method: 'POST',
-            body: JSON.stringify({ id: parseResult.data.id }),
-            headers: { 'Content-Type': 'application/json' },
-          },
-        ).then((res) => res.json())
-
-        const secondsIn28Days = 2419200
-        if (providedTimestamp - lastSetTimestamp < secondsIn28Days) {
-          console.error('Name change not allowed within 28 days')
-          return {
-            success: false,
-            error: 'Name change not allowed within 28 days',
-            statusCode: 400,
-          }
-        }
-      } catch (error) {
-        console.error('Error checking name ownership:', error)
-        return {
-          success: false,
-          error: 'Error checking name ownership',
           statusCode: 500,
         }
       }
@@ -161,7 +132,7 @@ export default defineEventHandler(async (event) => {
 
       // Save the name
       try {
-        await set(parseResult.data)
+        await setOrUpdate(parseResult.data)
         const response = { success: true }
         return Response.json(response, { status: 201 })
       } catch (err) {
