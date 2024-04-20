@@ -90,9 +90,9 @@ export async function getDataByOwner(owner: string): Promise<Array<{ id: string;
     const db = createKysely()
     const records = await db
       .selectFrom('names')
-      .select('id', 'name')
+      .selectAll()
       .where('owner', '=', owner)
-      .execute()
+      .executeTakeFirst()
 
     if (!records) {
       console.log('No record found for owner:', owner)
