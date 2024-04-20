@@ -83,3 +83,24 @@ export async function getAllFields(field: string): Promise<Array<string | number
     throw error
   }
 }
+
+
+export async function getDataByOwner(owner: string): Promise<Array<{ id: string; name: string }> | null> {
+  try {
+    const db = createKysely()
+    const records = await db
+      .selectFrom('names')
+      .select('id', 'name')
+      .where('owner', '=', owner)
+      .executeTakeFirst()
+
+    if (!records) {
+      console.log('No record found for owner:', owner)
+      return null
+    }
+    return records
+  } catch (error) {
+    console.error('Error caught in getDataByOwner function:', error)
+    throw error
+  }
+}
