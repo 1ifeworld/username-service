@@ -72,12 +72,12 @@ export default defineEventHandler(async (event) => {
       try {
         const records = await getDataByOwner(owner)
         if (records === null) {
-          return Response.json({ error: 'Id not found' }, { status: 404 })
+          return Response.json({ error: 'records not found' }, { status: 404 })
         }
 
         return Response.json({ records }, { status: 200 })
       } catch (error) {
-        console.error('Error fetching id by owner:', error)
+        console.error('Error fetching records by owner:', error)
         return Response.json(
           { error: 'Internal Server Error' },
           { status: 500 },
