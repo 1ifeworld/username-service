@@ -92,7 +92,7 @@ export async function getDataByOwner(owner: string): Promise<Array<{ id: string;
       .selectFrom('names')
       .select('id', 'name')
       .where('owner', '=', owner)
-      .executeTakeFirst()
+      .execute()
 
     if (!records) {
       console.log('No record found for owner:', owner)
