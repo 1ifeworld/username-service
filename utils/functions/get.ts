@@ -98,6 +98,7 @@ export async function getDataByOwner(owner: string): Promise<Array<{ id: string;
       console.log('No record found for owner:', owner)
       return null
     }
+    console.log(records)
     return records
   } catch (error) {
     console.error('Error caught in getDataByOwner function:', error)
