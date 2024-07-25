@@ -12,7 +12,7 @@ export interface NameInKysely {
 
 export const ZodName = z.object({
   id: z.string(), // Mandatory userId
-  name: z.string().regex(/^[a-z][a-z0-9-_]{0,20}$/), // mandatory username
+  name: z.string().regex(/^[_a-z0-9][_a-z0-9]{0,20}$/), // mandatory username
   owner: z.string(), // Mandatory privy address
   signature: z.string(), // Mandatory ECDSA signature
   timestamp: z.string().optional(), // Optional unix timestamp
@@ -41,7 +41,7 @@ export interface ChangelogInKysely {
 
 export const ZodChangelog = z.object({
   id: z.string(), // Mandatory userId
-  name: z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{0,20}$/), // Mandatory username
+  name: z.string().regex(/^[_a-z0-9][_a-z0-9]{0,20}$/),
   owner: z.string(), // Mandatory privy address
   signature: z.string(), // Mandatory ECDSA signature
   timestamp: z.string().optional(), // Optional unix timestamp
